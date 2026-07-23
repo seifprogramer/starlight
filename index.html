@@ -142,17 +142,9 @@
   .yt-channel { font-size: 12px; color: #aaa; }
   .yt-player-area { flex: 1; background: #000; display: flex; flex-direction: column; }
 
-  /* Grep.app App Styling */
-  .grep-container { display: flex; flex-direction: column; height: 100%; background: #0d1117; color: #c9d1d9; }
-  .grep-header { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid #30363d; background: #161b22; }
-  .grep-search-input { flex: 1; padding: 8px 14px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; outline: none; font-family: monospace; }
-  .grep-search-btn { padding: 8px 16px; border-radius: 6px; background: #238636; border: 1px solid rgba(27,31,35,0.1); color: white; cursor: pointer; font-weight: 600; }
-  .grep-search-btn:hover { background: #2ea043; }
-  .grep-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-family: monospace; }
-  .grep-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-  .grep-repo { font-size: 12px; color: #58a6ff; text-decoration: none; font-weight: bold; }
-  .grep-repo:hover { text-decoration: underline; }
-  .grep-snippet { background: #0d1117; padding: 8px; border-radius: 4px; font-size: 12px; overflow-x: auto; color: #e6edf3; border: 1px solid #21262d; white-space: pre-wrap; }
+  /* Grep.app Embedded App Styling */
+  .grep-container { display: flex; flex-direction: column; height: 100%; background: #0d1117; }
+  .grep-iframe { flex: 1; border: none; width: 100%; background: #0d1117; }
 </style>
 </head>
 <body>
@@ -266,7 +258,7 @@
     </div>
   </div>
 
-  <!-- Grep.app App -->
+  <!-- Grep.app Embedded App -->
   <div class="window" id="win-grep" style="width:750px; height:500px;" onmousedown="focusAppWindow('grep')">
     <div class="win-titlebar">
       <div class="win-title"><span>🔍</span> grep.app</div>
@@ -278,13 +270,7 @@
     </div>
     <div class="win-content">
       <div class="grep-container">
-        <div class="grep-header">
-          <input type="text" class="grep-search-input" id="grep-search-box" placeholder="Search code across public GitHub repositories..." onkeydown="if(event.key==='Enter') searchGrepApp()">
-          <button class="grep-search-btn" onclick="searchGrepApp()">Search</button>
-        </div>
-        <div class="grep-body" id="grep-results">
-          <div style="text-align:center; color:#8b949e; margin-top:40px;">Enter a query to search code snippets (e.g., fetch, express, useState)...</div>
-        </div>
+        <iframe class="grep-iframe" src="/api/proxy?url=https://grep.app"></iframe>
       </div>
     </div>
   </div>
@@ -505,43 +491,6 @@
 
   function playYouTubeVideo(videoId) {
     document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
-  }
-
-  /* Grep.app Search Engine Integration */
-  async function searchGrepApp() {
-    const query = document.getElementById('grep-search-box').value.trim();
-    if (!query) return;
-
-    const resultsDiv = document.getElementById('grep-results');
-    resultsDiv.innerHTML = '<div style="text-align:center; color:#8b949e; margin-top:40px;">Searching grep.app API...</div>';
-
-    try {
-      const response = await fetch(`https://grep.app/api/search?q=${encodeURIComponent(query)}`);
-      const data = await response.json();
-
-      if (data && data.hits && data.hits.length > 0) {
-        resultsDiv.innerHTML = data.hits.map(hit => {
-          const repoName = hit.repo && hit.repo.raw ? hit.repo.raw : 'Unknown Repository';
-          const repoUrl = hit.url ? hit.url : '#';
-          const snippetText = hit.content && hit.content.snippet ? hit.content.snippet : 'No snippet available';
-          
-          return `
-            <div class="grep-card">
-              <a class="grep-repo" href="${repoUrl}" target="_blank">📂 ${repoName}</a>
-              <div class="grep-snippet">${escapeHtml(snippetText)}</div>
-            </div>
-          `;
-        }).join('');
-      } else {
-        resultsDiv.innerHTML = '<div style="text-align:center; color:#8b949e; margin-top:40px;">No code matches found.</div>';
-      }
-    } catch (err) {
-      resultsDiv.innerHTML = '<div style="text-align:center; color:#f85149; margin-top:40px;">Failed to fetch from grep.app API (CORS/Network restriction).</div>';
-    }
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   /* Chrome Proxy Browser Navigator */
