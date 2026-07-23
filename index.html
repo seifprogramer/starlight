@@ -123,11 +123,13 @@
   .gd-app { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { background: #111; border: 1px solid var(--glass-border); border-radius: 8px; }
 
-  /* Standard Web Browser App */
+  /* Standard Web Browser App with Form Search Bypass */
   .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; }
-  .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); }
+  .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); align-items: center; }
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
   .browser-btn { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .browser-home { padding: 8px 12px; background: rgba(255,255,255,0.08); color: white; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .browser-home:hover { background: var(--glass-hover); }
   .browser-iframe { flex: 1; border: none; width: 100%; background: #fff; }
 
   /* YouTube App Styling */
@@ -535,7 +537,7 @@
     </div>
   </div>
 
-  <!-- Standard Web Browser App -->
+  <!-- Standard Web Browser App with Search Bypass & Safe Frame Fallback -->
   <div class="window" id="win-chrome" style="width:780px; height:500px; top: 220px; left: 400px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
       <div class="win-title"><span>🌐</span> Web Browser</div>
@@ -548,10 +550,11 @@
     <div class="win-content">
       <div class="browser-container">
         <div class="browser-bar">
-          <input type="text" class="browser-input" id="browser-url" value="https://example.com" placeholder="Enter URL..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
+          <button class="browser-home" onclick="loadBrowserHome()" title="Home Dashboard">🏠 Home</button>
+          <input type="text" class="browser-input" id="browser-url" value="https://example.com" placeholder="Enter URL or search query..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
           <button class="browser-btn" onclick="navigateBrowser()">Go</button>
         </div>
-        <iframe class="browser-iframe" id="browser-frame" src="https://example.com" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <iframe class="browser-iframe" id="browser-frame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
       </div>
     </div>
   </div>
@@ -620,6 +623,7 @@
     renderSettingsAppList();
     startClock();
     initDraggableWindows();
+    loadBrowserHome();
     
     // Load saved Notepad
     document.getElementById('notepad-textarea').value = localStorage.getItem('win12_notepad') || '';
@@ -906,15 +910,71 @@
     }
   }
 
-  // Standard Web Browser App
+  // Standard Web Browser App with Search and Safe Homepage Dashboard
+  function loadBrowserHome() {
+    document.getElementById('browser-url').value = 'home://dashboard';
+    const iframe = document.getElementById('browser-frame');
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', sans-serif; background: #121218; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .search-box { width: 500px; max-width: 90%; display: flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; overflow: hidden; padding: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+          .search-input { flex: 1; background: transparent; border: none; padding: 12px 20px; color: #fff; font-size: 16px; outline: none; }
+          .search-btn { background: #0078d4; color: #fff; border: none; padding: 10px 24px; border-radius: 24px; font-weight: 600; cursor: pointer; }
+          .quick-links { display: flex; gap: 16px; margin-top: 24px; }
+          .link-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; color: #aaa; text-decoration: none; font-size: 13px; cursor: pointer; }
+          .link-chip:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        </style>
+      </head>
+      <body>
+        <h1 style="margin-bottom: 20px; font-weight: 300; letter-spacing: 1px;">Windows 12 Web Explorer</h1>
+        <div class="search-box">
+          <input type="text" class="search-input" id="home-q" placeholder="Search the web or type a URL..." onkeydown="if(event.key==='Enter') doSearch()">
+          <button class="search-btn" onclick="doSearch()">Search</button>
+        </div>
+        <div class="quick-links">
+          <span class="link-chip" onclick="window.parent.navigateUrl('https://en.wikipedia.org')">Wikipedia</span>
+          <span class="link-chip" onclick="window.parent.navigateUrl('https://news.ycombinator.com')">Hacker News</span>
+          <span class="link-chip" onclick="window.parent.navigateUrl('https://example.com')">Example Site</span>
+        </div>
+        <script>
+          function doSearch() {
+            const val = document.getElementById('home-q').value.trim();
+            if(!val) return;
+            if(val.includes('.') && !val.includes(' ')) {
+              let target = val.startsWith('http') ? val : 'https://' + val;
+              window.parent.navigateUrl(target);
+            } else {
+              window.parent.navigateUrl('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(val));
+            }
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    doc.close();
+  }
+
+  function navigateUrl(url) {
+    document.getElementById('browser-url').value = url;
+    document.getElementById('browser-frame').src = url;
+  }
+
   function navigateBrowser() {
     let url = document.getElementById('browser-url').value.trim();
-    if(!url) return;
+    if(!url || url === 'home://dashboard') {
+      loadBrowserHome();
+      return;
+    }
     if(!url.startsWith('http://') && !url.startsWith('https://')) {
       if(url.includes('.') && !url.includes(' ')) {
         url = 'https://' + url;
       } else {
-        url = 'https://www.duckduckgo.com/?q=' + encodeURIComponent(url);
+        url = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(url);
       }
       document.getElementById('browser-url').value = url;
     }
