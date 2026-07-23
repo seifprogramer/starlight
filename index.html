@@ -602,415 +602,507 @@
 
   const defaultSystemApps = { 
     store: { id: 'store', name: 'Microsoft Store', icon: '🛍️' },
-    settings: { id: 'settings', name: 'Settings', icon: '⚙️' }
+    settings: { id: 'settings', name: 'Settings', icon: '⚙️' },
+    spotify: { id: 'spotify', name: 'Spotify', icon: '🎵' },
+    gd: { id: 'gd', name: 'Geometry Dash', icon: '🟩' },
+    vscode: { id: 'vscode', name: 'VS Code', icon: '💙' },
+    youtube: { id: 'youtube', name: 'YouTube', icon: '▶️' },
+    grep: { id: 'grep', name: 'grep.app', icon: '🔍' },
+    chrome: { id: 'chrome', name: 'Web Browser', icon: '🌐' },
+    notepad: { id: 'notepad', name: 'Notepad', icon: '📝' }
   };
 
-  let installedApps = JSON.parse(localStorage.getItem('win12_installed_apps')) || ['store', 'settings', 'youtube', 'vscode', 'notepad', 'chrome'];
-  let openWindows = [];
+  let installedApps = JSON.parse(localStorage.getItem('win12_installed')) || ['store', 'settings', 'spotify', 'gd', 'vscode', 'youtube', 'grep', 'chrome', 'notepad'];
+  let runningApps = [];
   let zIndexCounter = 100;
-  let isDataSaver = false;
+  let activeSettingsTabId = 'pane-system';
 
   // ==============================================
-  // INITIALIZATION
+  // INITIALIZATION & UI SETUP
   // ==============================================
-  function initOS() {
-    renderDesktop();
-    renderTaskbar();
-    renderStore();
-    renderSettingsAppList();
-    startClock();
+  window.addEventListener('DOMContentLoaded', () => {
+    initDesktopIcons();
+    initStoreCatalog();
+    initSettingsAppList();
     initDraggableWindows();
-    
-    // Load saved Notepad
-    document.getElementById('notepad-textarea').value = localStorage.getItem('win12_notepad') || '';
-    
-    // VS Code initial render
+    initGeometryDash();
     updateCodePreview();
     
-    // Start Geometry Dash Loop
-    initGeometryDash();
+    // Load local storage states
+    const savedAccent = localStorage.getItem('win12_accent');
+    if(savedAccent) changeAccentColor(savedAccent, false);
+
+    const savedWallpaper = localStorage.getItem('win12_wallpaper');
+    if(savedWallpaper) changeWallpaper(savedWallpaper, false);
+
+    const savedTaskbar = localStorage.getItem('win12_taskbar');
+    if(savedTaskbar) changeTaskbarAlignment(savedTaskbar, false);
+
+    const dataSaverState = localStorage.getItem('win12_datasaver') === 'true';
+    if(dataSaverState) toggleDataSaver(true, false);
+
+    const savedNotepad = localStorage.getItem('win12_notepad');
+    if(savedNotepad) document.getElementById('notepad-textarea').value = savedNotepad;
+
+    // Clock ticker
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('taskbar-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 1000);
+  });
+
+  function initDesktopIcons() {
+    const desktop = document.getElementById('desktop');
+    desktop.innerHTML = '';
+    installedApps.forEach(appId => {
+      const app = defaultSystemApps[appId] || catalog.find(c => c.id === appId);
+      if(!app) return;
+      const iconEl = document.createElement('div');
+      iconEl.className = 'desktop-icon';
+      iconEl.innerHTML = `
+        <div class="ico">${app.icon}</div>
+        <span>${app.name}</span>
+      `;
+      iconEl.ondblclick = () => openWindow(appId);
+      desktop.appendChild(iconEl);
+    });
+    renderTaskbar();
+  }
+
+  function initStoreCatalog() {
+    const grid = document.getElementById('store-catalog');
+    grid.innerHTML = '';
+    catalog.forEach(item => {
+      const isInstalled = installedApps.includes(item.id);
+      const card = document.createElement('div');
+      card.className = 'store-card';
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="font-size:28px;">${item.icon}</div>
+          <div>
+            <strong>${item.name}</strong>
+            <div style="font-size:11px; color:var(--text-dim);">${item.desc}</div>
+          </div>
+        </div>
+        <button class="store-btn" onclick="toggleInstallApp('${item.id}')" style="background:${isInstalled ? '#333' : 'var(--accent)'};">${isInstalled ? 'Uninstall' : 'Install'}</button>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function initSettingsAppList() {
+    const listEl = document.getElementById('settings-app-list');
+    if(!listEl) return;
+    listEl.innerHTML = '';
+    installedApps.forEach(appId => {
+      const app = defaultSystemApps[appId] || catalog.find(c => c.id === appId);
+      if(!app) return;
+      const row = document.createElement('div');
+      row.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:6px;";
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>${app.icon}</span>
+          <span style="font-size:13px;">${app.name}</span>
+        </div>
+        <button class="store-btn" style="background:#e81123; padding:4px 10px; font-size:11px;" onclick="toggleInstallApp('${appId}')">Remove</button>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  function toggleInstallApp(appId) {
+    if(installedApps.includes(appId)) {
+      installedApps = installedApps.filter(id => id !== appId);
+      closeWindow(appId);
+    } else {
+      installedApps.push(appId);
+    }
+    localStorage.setItem('win12_installed', JSON.stringify(installedApps));
+    initDesktopIcons();
+    initStoreCatalog();
+    initSettingsAppList();
   }
 
   // ==============================================
-  // UI RENDERING
+  // WINDOW MANAGER ENGINE
   // ==============================================
-  function renderDesktop() {
-    const desktop = document.getElementById('desktop');
-    desktop.innerHTML = '';
+  function openWindow(appId) {
+    const win = document.getElementById(`win-${appId}`);
+    if(!win) return;
+    win.style.display = 'flex';
+    win.classList.add('open');
+    focusAppWindow(appId);
+    if(!runningApps.includes(appId)) runningApps.push(appId);
+    renderTaskbar();
+  }
+
+  function closeWindow(appId) {
+    const win = document.getElementById(`win-${appId}`);
+    if(win) {
+      win.classList.remove('open');
+      win.style.display = 'none';
+    }
+    runningApps = runningApps.filter(id => id !== appId);
+    renderTaskbar();
+  }
+
+  function minimizeWindow(appId) {
+    const win = document.getElementById(`win-${appId}`);
+    if(win) {
+      win.classList.remove('open');
+      win.style.display = 'none';
+    }
+  }
+
+  function toggleMaximize(appId) {
+    const win = document.getElementById(`win-${appId}`);
+    if(win) {
+      win.classList.toggle('maximized');
+      focusAppWindow(appId);
+    }
+  }
+
+  function focusAppWindow(appId) {
+    zIndexCounter++;
+    const win = document.getElementById(`win-${appId}`);
+    if(win) win.style.zIndex = zIndexCounter;
     
-    installedApps.forEach(appId => {
-      let appInfo = catalog.find(a => a.id === appId) || defaultSystemApps[appId];
-      if(!appInfo) return;
-      
-      const icon = document.createElement('div');
-      icon.className = 'desktop-icon';
-      icon.ondblclick = () => openApp(appId);
-      icon.innerHTML = `<div class="ico">${appInfo.icon}</div><span>${appInfo.name}</span>`;
-      desktop.appendChild(icon);
-    });
+    // Update taskbar active states
+    document.querySelectorAll('.taskbar-btn.app-tb-btn').forEach(btn => btn.style.borderBottom = 'none');
+    const activeTb = document.getElementById(`tb-btn-${appId}`);
+    if(activeTb) activeTb.style.borderBottom = '2px solid var(--accent)';
   }
 
   function renderTaskbar() {
-    const taskbarApps = document.getElementById('taskbar-apps');
-    taskbarApps.innerHTML = '<div class="taskbar-btn start-btn" title="Start Menu">✶</div>';
+    const container = document.getElementById('taskbar-apps');
+    // Keep start button intact
+    container.innerHTML = `<div class="taskbar-btn start-btn" title="Start Menu" onclick="alert('Windows 12 Web OS - Start Menu\\nAll Systems Nominal.')">✶</div>`;
     
-    installedApps.forEach(appId => {
-      let appInfo = catalog.find(a => a.id === appId) || defaultSystemApps[appId];
-      if(!appInfo) return;
-      
+    runningApps.forEach(appId => {
+      const app = defaultSystemApps[appId] || catalog.find(c => c.id === appId);
+      if(!app) return;
       const btn = document.createElement('div');
-      btn.className = `taskbar-btn ${openWindows.includes(appId) ? 'running' : ''}`;
-      btn.title = appInfo.name;
-      btn.innerHTML = appInfo.icon;
+      btn.className = 'taskbar-btn running app-tb-btn';
+      btn.id = `tb-btn-${appId}`;
+      btn.title = app.name;
+      btn.innerText = app.icon;
       btn.onclick = () => {
         const win = document.getElementById(`win-${appId}`);
-        if(win.classList.contains('open')) minimizeWindow(appId);
-        else openApp(appId);
+        if(win.style.display === 'none' || !win.classList.contains('open')) {
+          openWindow(appId);
+        } else {
+          minimizeWindow(appId);
+        }
       };
-      taskbarApps.appendChild(btn);
+      container.appendChild(btn);
     });
   }
 
-  // ==============================================
-  // WINDOW MANAGEMENT
-  // ==============================================
-  function openApp(id) {
-    const win = document.getElementById(`win-${id}`);
-    if(!win) return;
-    win.classList.add('open');
-    if(!openWindows.includes(id)) openWindows.push(id);
-    focusAppWindow(id);
-    renderTaskbar();
-  }
-
-  function closeWindow(id) {
-    const win = document.getElementById(`win-${id}`);
-    win.classList.remove('open');
-    openWindows = openWindows.filter(appId => appId !== id);
-    renderTaskbar();
-  }
-
-  function minimizeWindow(id) {
-    const win = document.getElementById(`win-${id}`);
-    win.classList.remove('open');
-    renderTaskbar();
-  }
-
-  function toggleMaximize(id) {
-    const win = document.getElementById(`win-${id}`);
-    win.classList.toggle('maximized');
-    focusAppWindow(id);
-  }
-
-  function focusAppWindow(id) {
-    zIndexCounter++;
-    const win = document.getElementById(`win-${id}`);
-    if(win) win.style.zIndex = zIndexCounter;
-  }
-
+  // Draggable Windows Logic
   function initDraggableWindows() {
     document.querySelectorAll('.window').forEach(win => {
-      const header = win.querySelector('.win-titlebar');
-      let isDragging = false, startX, startY, initialX, initialY;
+      const titlebar = win.querySelector('.win-titlebar');
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
 
-      header.addEventListener('mousedown', (e) => {
-        if(e.target.classList.contains('win-btn') || e.target.parentElement.classList.contains('win-btn')) return;
-        
+      titlebar.addEventListener('mousedown', (e) => {
+        if(win.classList.contains('maximized')) return;
         isDragging = true;
-        startX = e.clientX; startY = e.clientY;
-        initialX = win.offsetLeft; initialY = win.offsetTop;
-        focusAppWindow(win.id.replace('win-', ''));
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = win.offsetLeft;
+        initialTop = win.offsetTop;
+        
+        // Extract appId from id e.g., win-store -> store
+        const appId = win.id.replace('win-', '');
+        focusAppWindow(appId);
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
       });
 
-      document.addEventListener('mousemove', (e) => {
-        if (!isDragging || win.classList.contains('maximized')) return;
-        win.style.left = `${initialX + (e.clientX - startX)}px`;
-        win.style.top = `${initialY + (e.clientY - startY)}px`;
-      });
+      function onMouseMove(e) {
+        if(!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        win.style.left = `${initialLeft + dx}px`;
+        win.style.top = `${initialTop + dy}px`;
+      }
 
-      document.addEventListener('mouseup', () => isDragging = false);
+      function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
     });
   }
 
   // ==============================================
-  // SETTINGS & SYSTEM FEATURES
+  // SETTINGS APP LOGIC
   // ==============================================
   function switchSettingsTab(tabId, el) {
     document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
+    
     el.classList.add('active');
-    document.getElementById(`pane-${tabId}`).classList.add('active');
+    const pane = document.getElementById(`pane-${tabId}`);
+    if(pane) pane.classList.add('active');
+    activeSettingsTabId = tabId;
   }
 
   function adjustBrightness(val) {
-    document.getElementById('main-container').style.filter = `brightness(${val}%)`;
+    const opacity = val / 100;
+    document.getElementById('main-container').style.filter = `brightness(${opacity})`;
   }
 
-  function changeAccentColor(color) {
+  function changeAccentColor(color, save=true) {
     document.documentElement.style.setProperty('--accent', color);
+    if(save) localStorage.setItem('win12_accent', color);
   }
 
-  function changeWallpaper(url) {
+  function changeWallpaper(url, save=true) {
     document.getElementById('main-container').style.background = `url('${url}') center/cover no-repeat`;
+    if(save) localStorage.setItem('win12_wallpaper', url);
   }
 
-  function changeTaskbarAlignment(val) {
+  function changeTaskbarAlignment(val, save=true) {
     document.getElementById('taskbar-apps').style.justifyContent = val;
+    if(save) localStorage.setItem('win12_taskbar', val);
   }
 
-  function toggleDataSaver(active) {
-    isDataSaver = active;
-    document.getElementById('data-saver-toggle').checked = active;
-    if(active) {
+  function toggleDataSaver(enable, save=true) {
+    const banner = document.getElementById('data-saver-status');
+    const toggleInput = document.getElementById('data-saver-toggle');
+    if(toggleInput) toggleInput.checked = enable;
+
+    if(enable) {
       document.body.classList.add('data-saver-active');
-      document.getElementById('data-saver-status').style.display = 'inline';
+      banner.style.display = 'inline';
     } else {
       document.body.classList.remove('data-saver-active');
-      document.getElementById('data-saver-status').style.display = 'none';
+      banner.style.display = 'none';
     }
-    if(document.getElementById('yt-search-box').value) searchYouTube();
+    if(save) localStorage.setItem('win12_datasaver', enable);
   }
 
-  function startClock() {
-    setInterval(() => {
-      const d = new Date();
-      document.getElementById('taskbar-clock').innerText = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    }, 1000);
-  }
-
-  function saveNotepad() {
-    localStorage.setItem('win12_notepad', document.getElementById('notepad-textarea').value);
-  }
-
-  // ==============================================
-  // STORE & APP MANAGEMENT
-  // ==============================================
-  function renderStore() {
-    const catalogEl = document.getElementById('store-catalog');
-    catalogEl.innerHTML = '';
-    
-    catalog.forEach(app => {
-      if(app.id === 'settings') return;
-      const isInstalled = installedApps.includes(app.id);
-      
-      const card = document.createElement('div');
-      card.className = 'store-card';
-      card.innerHTML = `
-        <div style="font-size: 32px;">${app.icon}</div>
-        <div style="font-weight: 600; font-size: 14px;">${app.name}</div>
-        <div style="font-size: 12px; color: var(--text-dim); flex: 1;">${app.desc}</div>
-        <button class="store-btn" onclick="toggleInstall('${app.id}')" style="background: ${isInstalled ? '#e81123' : 'var(--accent)'}">
-          ${isInstalled ? 'Uninstall' : 'Get App'}
-        </button>
-      `;
-      catalogEl.appendChild(card);
-    });
-  }
-
-  function renderSettingsAppList() {
-    const list = document.getElementById('settings-app-list');
-    list.innerHTML = '';
-    installedApps.forEach(appId => {
-      if(appId === 'store' || appId === 'settings') return;
-      let appInfo = catalog.find(a => a.id === appId);
-      if(!appInfo) return;
-      
-      const el = document.createElement('div');
-      el.style.display = 'flex';
-      el.style.justifyContent = 'space-between';
-      el.style.padding = '8px';
-      el.style.background = 'rgba(255,255,255,0.05)';
-      el.style.borderRadius = '6px';
-      el.innerHTML = `
-        <span>${appInfo.icon} ${appInfo.name}</span>
-        <button class="win-btn close" style="width:auto; padding:0 8px;" onclick="toggleInstall('${appId}')">Uninstall</button>
-      `;
-      list.appendChild(el);
-    });
-  }
-
-  function toggleInstall(id) {
-    if(installedApps.includes(id)) {
-      installedApps = installedApps.filter(a => a !== id);
-      closeWindow(id);
+  function toggleAirplaneMode(enable) {
+    if(enable) {
+      alert('Airplane mode enabled. All wireless communications halted.');
+      const wifiToggle = document.getElementById('setting-wifi');
+      if(wifiToggle) { wifiToggle.checked = false; }
     } else {
-      installedApps.push(id);
+      alert('Airplane mode disabled. Restoring wireless networks.');
     }
-    localStorage.setItem('win12_installed_apps', JSON.stringify(installedApps));
-    renderDesktop();
-    renderTaskbar();
-    renderStore();
-    renderSettingsAppList();
+  }
+
+  function saveSettingsState() {
+    // Generic placeholder for state updates
   }
 
   // ==============================================
-  // APP SPECIFIC LOGIC
+  // BUILT-IN APPS LOGIC
   // ==============================================
-  
-  // VS Code
-  function updateCodePreview() {
-    const html = document.getElementById('code-editor').value;
-    const iframe = document.getElementById('code-preview');
-    const doc = iframe.contentWindow.document;
-    doc.open(); doc.write(html); doc.close();
-  }
 
-  // Spotify (Mock)
-  let isPlaying = false;
+  // 1. Spotify Music App
+  let isPlayingAudio = false;
+  const playlist = [
+    { title: "Synthwave Chill", artist: "Quantum Beats" },
+    { title: "Cyberpunk Horizon", artist: "Neural Sound System" },
+    { title: "Ambient Rain", artist: "Lo-Fi OS" }
+  ];
+  let currentTrackIdx = 0;
+
   function toggleAudio() {
-    isPlaying = !isPlaying;
-    document.getElementById('play-btn').innerText = isPlaying ? '⏸' : '▶';
-    document.getElementById('sp-title').innerText = isPlaying ? 'Playing Synthwave...' : 'Paused';
+    isPlayingAudio = !isPlayingAudio;
+    const btn = document.getElementById('play-btn');
+    btn.innerText = isPlayingAudio ? "⏸" : "▶";
+    if(isPlayingAudio) {
+      // Simulate web audio context tone or stream
+    }
   }
-  function nextTrack() { document.getElementById('sp-title').innerText = 'Next Track Loaded...'; }
-  function prevTrack() { document.getElementById('sp-title').innerText = 'Previous Track...'; }
 
-  // YouTube App
-  async function searchYouTube() {
-    const query = document.getElementById('yt-search-box').value;
-    const sidebar = document.getElementById('yt-results');
-    if(!query) return;
-    
-    sidebar.innerHTML = '<div style="text-align:center; padding: 20px;">Searching...</div>';
-    
-    try {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}&type=video`);
-      const data = await res.json();
-      
-      sidebar.innerHTML = '';
-      if(data.items) {
-        data.items.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'yt-result-card';
-          card.onclick = () => {
-            document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${item.id.videoId}?autoplay=1`;
-          };
-          
-          let thumbHTML = '';
-          if(!isDataSaver) {
-            thumbHTML = `<img src="${item.snippet.thumbnails.medium.url}" class="yt-thumb">`;
-          } else {
-            thumbHTML = `<div class="yt-thumb" style="background:#222; display:flex; align-items:center; justify-content:center; color:#555;">[Data Saver]</div>`;
+  function nextTrack() {
+    currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
+    updateTrackUI();
+  }
+
+  function prevTrack() {
+    currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
+    updateTrackUI();
+  }
+
+  function updateTrackUI() {
+    document.getElementById('sp-title').innerText = playlist[currentTrackIdx].title;
+    document.getElementById('sp-artist').innerText = playlist[currentTrackIdx].artist;
+  }
+
+  // 2. Geometry Dash Game App
+  let gdGameStarted = false;
+  let gdScore = 0;
+  let gdHighScore = 0;
+  let cube = { x: 50, y: 200, size: 24, vy: 0, gravity: 0.8, jump: -11, grounded: false };
+  let obstacles = [];
+  let frameCount = 0;
+
+  function initGeometryDash() {
+    const canvas = document.getElementById('gdCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    window.addEventListener('keydown', (e) => {
+      if(e.code === 'Space') {
+        triggerGDJump();
+      }
+    });
+
+    canvas.addEventListener('click', () => {
+      triggerGDJump();
+    });
+
+    function triggerGDJump() {
+      if(!gdGameStarted) {
+        gdGameStarted = true;
+        gdScore = 0;
+        obstacles = [];
+        cube.y = 200;
+        cube.vy = 0;
+      }
+      if(cube.grounded) {
+        cube.vy = cube.jump;
+        cube.grounded = false;
+      }
+    }
+
+    function loop() {
+      if(gdGameStarted) {
+        frameCount++;
+        cube.vy += cube.gravity;
+        cube.y += cube.vy;
+
+        // Ground collision
+        if(cube.y > 236) {
+          cube.y = 236;
+          cube.vy = 0;
+          cube.grounded = true;
+        }
+
+        // Spawn obstacles
+        if(frameCount % 90 === 0) {
+          obstacles.push({ x: 480, width: 22, height: 26 + Math.random()*20 });
+        }
+
+        // Move obstacles
+        for(let i = obstacles.length - 1; i >= 0; i--) {
+          obstacles[i].x -= 4.5;
+          // Collision check
+          if(
+            cube.x < obstacles[i].x + obstacles[i].width &&
+            cube.x + cube.size > obstacles[i].x &&
+            cube.y + cube.size > 260 - obstacles[i].height
+          ) {
+            // Crash
+            gdGameStarted = false;
+            if(gdScore > gdHighScore) gdHighScore = gdScore;
+            document.getElementById('gd-score-board').innerText = `CRASH! Score: ${gdScore} | High Score: ${gdHighScore} (Click/Space to Retry)`;
           }
 
-          card.innerHTML = `
-            ${thumbHTML}
-            <div class="yt-title">${item.snippet.title}</div>
-            <div class="yt-channel">${item.snippet.channelTitle}</div>
-          `;
-          sidebar.appendChild(card);
-        });
+          if(obstacles[i].x + obstacles[i].width < 0) {
+            obstacles.splice(i, 1);
+            gdScore += 10;
+            document.getElementById('gd-score-board').innerText = `Score: ${gdScore} | High Score: ${gdHighScore}`;
+          }
+        }
       }
-    } catch(err) {
-      sidebar.innerHTML = '<div style="color:red; padding:10px;">Search failed. Check API limit.</div>';
+
+      // Render
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Floor line
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 260);
+      ctx.lineTo(480, 260);
+      ctx.stroke();
+
+      // Draw Cube
+      ctx.fillStyle = '#ff0055';
+      ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
+
+      // Draw Obstacles (Spikes/Blocks)
+      ctx.fillStyle = '#ffff00';
+      obstacles.forEach(obs => {
+        ctx.fillRect(obs.x, 260 - obs.height, obs.width, obs.height);
+      });
+
+      requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  // 3. VS Code App Preview
+  function updateCodePreview() {
+    const code = document.getElementById('code-editor').value;
+    const preview = document.getElementById('code-preview');
+    const doc = preview.contentDocument || preview.contentWindow.document;
+    doc.open();
+    doc.write(code);
+    doc.close();
+  }
+
+  // 4. YouTube App API Integration
+  async function searchYouTube() {
+    const query = document.getElementById('yt-search-box').value.trim();
+    if(!query) return;
+    const resultsContainer = document.getElementById('yt-results');
+    resultsContainer.innerHTML = `<div style="text-align:center; color:#aaa; margin-top:20px;">Searching YouTube...</div>`;
+
+    try {
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if(data.items && data.items.length > 0) {
+        resultsContainer.innerHTML = '';
+        data.items.forEach(item => {
+          const videoId = item.id.videoId;
+          const snippet = item.snippet;
+          const card = document.createElement('div');
+          card.className = 'yt-result-card';
+          card.innerHTML = `
+            <img class="yt-thumb" src="${snippet.thumbnails.medium.url}" alt="thumb">
+            <div class="yt-title">${snippet.title}</div>
+            <div class="yt-channel">${snippet.channelTitle}</div>
+          `;
+          card.onclick = () => {
+            document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+          };
+          resultsContainer.appendChild(card);
+        });
+      } else {
+        resultsContainer.innerHTML = `<div style="text-align:center; color:#aaa; margin-top:20px;">No videos found.</div>`;
+      }
+    } catch (err) {
+      resultsContainer.innerHTML = `<div style="text-align:center; color:#ff5555; margin-top:20px;">Failed to fetch YouTube search. Check network or API key quota.</div>`;
     }
   }
 
-  // Standard Web Browser App
+  // 5. Standard Web Browser App Navigation
   function navigateBrowser() {
     let url = document.getElementById('browser-url').value.trim();
-    if(!url) return;
     if(!url.startsWith('http://') && !url.startsWith('https://')) {
-      if(url.includes('.') && !url.includes(' ')) {
-        url = 'https://' + url;
-      } else {
-        url = 'https://www.duckduckgo.com/?q=' + encodeURIComponent(url);
-      }
-      document.getElementById('browser-url').value = url;
+      url = 'https://' + url;
     }
     document.getElementById('browser-frame').src = url;
   }
 
-  // Geometry Dash Mini Game
-  function initGeometryDash() {
-    const canvas = document.getElementById('gdCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    let player = { x: 50, y: 250, size: 30, dy: 0, gravity: 0.8, jumpPower: -12, isGrounded: true };
-    let obstacles = [];
-    let frame = 0;
-    let score = 0;
-    let gameSpeed = 5;
-    let isGameOver = false;
-
-    function resetGame() {
-      player.y = 250; player.dy = 0;
-      obstacles = []; frame = 0; score = 0;
-      isGameOver = false;
-      document.getElementById('gd-score-board').innerText = 'Score: 0';
-    }
-
-    function jump() {
-      if(player.isGrounded && !isGameOver) {
-        player.dy = player.jumpPower;
-        player.isGrounded = false;
-      }
-      if(isGameOver) resetGame();
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if((e.code === 'Space' || e.code === 'ArrowUp') && document.getElementById('win-gd').classList.contains('open')) jump();
-    });
-    canvas.addEventListener('mousedown', jump);
-
-    function update() {
-      if(document.getElementById('win-gd').classList.contains('open') && !isGameOver) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.fillStyle = '#222';
-        ctx.fillRect(0, 280, canvas.width, 20);
-
-        player.dy += player.gravity;
-        player.y += player.dy;
-        
-        if(player.y + player.size >= 280) {
-          player.y = 280 - player.size;
-          player.dy = 0;
-          player.isGrounded = true;
-        }
-
-        ctx.fillStyle = '#00ff00';
-        ctx.fillRect(player.x, player.y, player.size, player.size);
-
-        if(frame % 90 === 0) {
-          obstacles.push({ x: canvas.width, y: 250, size: 30 });
-        }
-
-        ctx.fillStyle = '#ff0000';
-        for(let i = 0; i < obstacles.length; i++) {
-          let obs = obstacles[i];
-          obs.x -= gameSpeed;
-          
-          ctx.beginPath();
-          ctx.moveTo(obs.x + obs.size/2, obs.y);
-          ctx.lineTo(obs.x + obs.size, obs.y + obs.size);
-          ctx.lineTo(obs.x, obs.y + obs.size);
-          ctx.fill();
-
-          if (player.x < obs.x + obs.size - 5 &&
-              player.x + player.size > obs.x + 5 &&
-              player.y < obs.y + obs.size - 5 &&
-              player.y + player.size > obs.y + 5) {
-            isGameOver = true;
-            document.getElementById('gd-score-board').innerText = `Game Over! Score: ${score}. Click to restart.`;
-          }
-        }
-        
-        obstacles = obstacles.filter(o => o.x + o.size > 0);
-        
-        frame++;
-        if(frame % 10 === 0) {
-          score++;
-          document.getElementById('gd-score-board').innerText = `Score: ${score}`;
-        }
-      }
-      requestAnimationFrame(update);
-    }
-    update();
+  // 6. Notepad Storage
+  function saveNotepad() {
+    const text = document.getElementById('notepad-textarea').value;
+    localStorage.setItem('win12_notepad', text);
   }
-
-  window.onload = initOS;
-
 </script>
+
 </body>
 </html>
