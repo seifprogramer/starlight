@@ -67,7 +67,6 @@
     content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px;
     background: var(--text); border-radius: 50%;
   }
-  .taskbar-btn.active { background: var(--glass-hover); }
 
   /* Window Engine */
   .window {
@@ -124,7 +123,7 @@
   .gd-app { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { background: #111; border: 1px solid var(--glass-border); border-radius: 8px; }
 
-  /* Chrome Browser Styling */
+  /* Standard Web Browser App */
   .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; }
   .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); }
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
@@ -536,10 +535,10 @@
     </div>
   </div>
 
-  <!-- Chrome Browser App (Powered by YouTube API Search) -->
+  <!-- Standard Web Browser App -->
   <div class="window" id="win-chrome" style="width:780px; height:500px; top: 220px; left: 400px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🌐</span> Browser / Google Search</div>
+      <div class="win-title"><span>🌐</span> Web Browser</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('chrome')">-</div>
         <div class="win-btn" onclick="toggleMaximize('chrome')">□</div>
@@ -549,12 +548,10 @@
     <div class="win-content">
       <div class="browser-container">
         <div class="browser-bar">
-          <input type="text" class="browser-input" id="browser-url" placeholder="Search internet using YouTube API..." onkeydown="if(event.key==='Enter') searchChromeViaYT()" />
-          <button class="browser-btn" onclick="searchChromeViaYT()">Search</button>
+          <input type="text" class="browser-input" id="browser-url" value="https://example.com" placeholder="Enter URL..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
+          <button class="browser-btn" onclick="navigateBrowser()">Go</button>
         </div>
-        <div id="browser-results" style="flex: 1; background: #121212; color: #fff; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
-          <div style="text-align:center; color:var(--text-dim); margin-top:40px;">Type a query above to search and find matching video results instantly!</div>
-        </div>
+        <iframe class="browser-iframe" id="browser-frame" src="https://example.com" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
       </div>
     </div>
   </div>
@@ -595,7 +592,7 @@
   const catalog = [
     { id: 'youtube', name: 'YouTube', icon: '▶️', desc: 'Search and watch videos.' },
     { id: 'grep', name: 'grep.app', icon: '🔍', desc: 'Search code across public GitHub repos.' },
-    { id: 'chrome', name: 'Browser / Search', icon: '🌐', desc: 'Search engine using YT API.' },
+    { id: 'chrome', name: 'Web Browser', icon: '🌐', desc: 'Browse the open web.' },
     { id: 'vscode', name: 'VS Code', icon: '💙', desc: 'Live HTML editor.' },
     { id: 'gd', name: 'Geometry Dash', icon: '🟩', desc: 'Jump over spikes!' },
     { id: 'spotify', name: 'Spotify Music', icon: '🎵', desc: 'Endless song player.' },
@@ -608,7 +605,7 @@
     settings: { id: 'settings', name: 'Settings', icon: '⚙️' }
   };
 
-  let installedApps = JSON.parse(localStorage.getItem('win12_installed_apps')) || ['store', 'settings', 'youtube', 'vscode', 'notepad'];
+  let installedApps = JSON.parse(localStorage.getItem('win12_installed_apps')) || ['store', 'settings', 'youtube', 'vscode', 'notepad', 'chrome'];
   let openWindows = [];
   let zIndexCounter = 100;
   let isDataSaver = false;
@@ -655,7 +652,6 @@
 
   function renderTaskbar() {
     const taskbarApps = document.getElementById('taskbar-apps');
-    // Keep start button
     taskbarApps.innerHTML = '<div class="taskbar-btn start-btn" title="Start Menu">✶</div>';
     
     installedApps.forEach(appId => {
@@ -697,7 +693,6 @@
   function minimizeWindow(id) {
     const win = document.getElementById(`win-${id}`);
     win.classList.remove('open');
-    // Keeps it in openWindows array for taskbar dot, but visually hides it
     renderTaskbar();
   }
 
@@ -719,7 +714,6 @@
       let isDragging = false, startX, startY, initialX, initialY;
 
       header.addEventListener('mousedown', (e) => {
-        // Prevent dragging if clicking a control button
         if(e.target.classList.contains('win-btn') || e.target.parentElement.classList.contains('win-btn')) return;
         
         isDragging = true;
@@ -774,7 +768,6 @@
       document.body.classList.remove('data-saver-active');
       document.getElementById('data-saver-status').style.display = 'none';
     }
-    // Re-render YT searches to apply thumbnail restrictions
     if(document.getElementById('yt-search-box').value) searchYouTube();
   }
 
@@ -797,7 +790,7 @@
     catalogEl.innerHTML = '';
     
     catalog.forEach(app => {
-      if(app.id === 'settings') return; // Hide core apps from store
+      if(app.id === 'settings') return;
       const isInstalled = installedApps.includes(app.id);
       
       const card = document.createElement('div');
@@ -818,7 +811,7 @@
     const list = document.getElementById('settings-app-list');
     list.innerHTML = '';
     installedApps.forEach(appId => {
-      if(appId === 'store' || appId === 'settings') return; // Cannot uninstall core
+      if(appId === 'store' || appId === 'settings') return;
       let appInfo = catalog.find(a => a.id === appId);
       if(!appInfo) return;
       
@@ -913,48 +906,19 @@
     }
   }
 
-  // Chrome App (YT Wrapper)
-  async function searchChromeViaYT() {
-    const query = document.getElementById('browser-url').value;
-    const resultsArea = document.getElementById('browser-results');
-    if(!query) return;
-    
-    resultsArea.innerHTML = '<div style="text-align:center;">Loading internet results...</div>';
-    
-    try {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}&type=video`);
-      const data = await res.json();
-      
-      resultsArea.innerHTML = '';
-      if(data.items) {
-        data.items.forEach(item => {
-          const card = document.createElement('div');
-          card.style.display = 'flex';
-          card.style.gap = '16px';
-          card.style.background = 'rgba(255,255,255,0.05)';
-          card.style.padding = '12px';
-          card.style.borderRadius = '8px';
-          card.style.cursor = 'pointer';
-          
-          card.onclick = () => {
-            openApp('youtube');
-            document.getElementById('yt-search-box').value = query;
-            document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${item.id.videoId}?autoplay=1`;
-          };
-
-          card.innerHTML = `
-            <div style="flex:1;">
-              <div style="color: var(--accent); font-size: 16px; font-weight: bold; margin-bottom: 4px;">${item.snippet.title}</div>
-              <div style="color: #4caf50; font-size: 12px; margin-bottom: 8px;">www.youtube.com > watch > ${item.id.videoId}</div>
-              <div style="font-size: 13px; color: #ccc;">Uploaded by ${item.snippet.channelTitle}. ${item.snippet.description}</div>
-            </div>
-          `;
-          resultsArea.appendChild(card);
-        });
+  // Standard Web Browser App
+  function navigateBrowser() {
+    let url = document.getElementById('browser-url').value.trim();
+    if(!url) return;
+    if(!url.startsWith('http://') && !url.startsWith('https://')) {
+      if(url.includes('.') && !url.includes(' ')) {
+        url = 'https://' + url;
+      } else {
+        url = 'https://www.duckduckgo.com/?q=' + encodeURIComponent(url);
       }
-    } catch(err) {
-      resultsArea.innerHTML = '<div style="color:red;">Error fetching. Check connection or API key.</div>';
+      document.getElementById('browser-url').value = url;
     }
+    document.getElementById('browser-frame').src = url;
   }
 
   // Geometry Dash Mini Game
@@ -984,7 +948,6 @@
       if(isGameOver) resetGame();
     }
 
-    // Controls
     window.addEventListener('keydown', (e) => {
       if((e.code === 'Space' || e.code === 'ArrowUp') && document.getElementById('win-gd').classList.contains('open')) jump();
     });
@@ -994,11 +957,9 @@
       if(document.getElementById('win-gd').classList.contains('open') && !isGameOver) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Ground
         ctx.fillStyle = '#222';
         ctx.fillRect(0, 280, canvas.width, 20);
 
-        // Player physics
         player.dy += player.gravity;
         player.y += player.dy;
         
@@ -1008,11 +969,9 @@
           player.isGrounded = true;
         }
 
-        // Draw Player
         ctx.fillStyle = '#00ff00';
         ctx.fillRect(player.x, player.y, player.size, player.size);
 
-        // Obstacles
         if(frame % 90 === 0) {
           obstacles.push({ x: canvas.width, y: 250, size: 30 });
         }
@@ -1022,14 +981,12 @@
           let obs = obstacles[i];
           obs.x -= gameSpeed;
           
-          // Triangle spike
           ctx.beginPath();
           ctx.moveTo(obs.x + obs.size/2, obs.y);
           ctx.lineTo(obs.x + obs.size, obs.y + obs.size);
           ctx.lineTo(obs.x, obs.y + obs.size);
           ctx.fill();
 
-          // Collision check
           if (player.x < obs.x + obs.size - 5 &&
               player.x + player.size > obs.x + 5 &&
               player.y < obs.y + obs.size - 5 &&
@@ -1052,7 +1009,6 @@
     update();
   }
 
-  // Boot OS
   window.onload = initOS;
 
 </script>
