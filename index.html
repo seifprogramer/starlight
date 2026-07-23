@@ -51,6 +51,7 @@
     padding: 0 12px; z-index: 9999;
   }
   .taskbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+  .taskbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 12px; color: var(--text-dim); }
   .taskbar-btn {
     width: 40px; height: 40px; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
@@ -145,9 +146,36 @@
   /* Grep.app Embedded App Styling */
   .grep-container { display: flex; flex-direction: column; height: 100%; background: #0d1117; }
   .grep-iframe { flex: 1; border: none; width: 100%; background: #0d1117; }
+
+  /* Settings App Styling */
+  .settings-container { display: flex; height: 100%; background: #181824; color: white; }
+  .settings-sidebar { width: 200px; border-right: 1px solid var(--glass-border); padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .settings-tab { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-dim); }
+  .settings-tab:hover { background: var(--glass-hover); color: white; }
+  .settings-tab.active { background: var(--accent); color: white; font-weight: 500; }
+  .settings-content { flex: 1; padding: 24px; overflow-y: auto; }
+  .setting-group { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 16px; border-radius: 10px; margin-bottom: 12px; }
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .2s; border-radius: 24px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  /* Data Saver Overlay / Watermark */
+  .data-saver-banner {
+    position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #d83b01, #ea4300);
+    color: white; font-size: 11px; padding: 4px 12px; display: none; align-items: center; justify-content: space-between; z-index: 99999;
+  }
+  body.data-saver-active .data-saver-banner { display: flex; }
 </style>
 </head>
 <body>
+
+<div class="data-saver-banner" id="data-saver-banner">
+  <span>⚡ Data Saver Mode is Active (Thumbnails hidden, low-res media proxy enabled)</span>
+  <span style="cursor:pointer; font-weight:bold;" onclick="toggleDataSaver(false)">[Turn Off]</span>
+</div>
 
 <div class="win12-container">
   <div class="desktop" id="desktop"></div>
@@ -164,6 +192,38 @@
     </div>
     <div class="win-content">
       <div class="store-grid" id="store-catalog"></div>
+    </div>
+  </div>
+
+  <!-- Settings App -->
+  <div class="window" id="win-settings" style="width:650px; height:420px;" onmousedown="focusAppWindow('settings')">
+    <div class="win-titlebar">
+      <div class="win-title"><span>⚙️</span> Settings</div>
+      <div class="win-controls">
+        <div class="win-btn" onclick="minimizeWindow('settings')">-</div>
+        <div class="win-btn" onclick="toggleMaximize('settings')">□</div>
+        <div class="win-btn close" onclick="closeWindow('settings')">✕</div>
+      </div>
+    </div>
+    <div class="win-content">
+      <div class="settings-container">
+        <div class="settings-sidebar">
+          <div class="settings-tab active">Network & Internet</div>
+        </div>
+        <div class="settings-content">
+          <h3 style="margin-bottom: 16px;">Network Settings</h3>
+          <div class="setting-group">
+            <div>
+              <strong>Data Saver</strong>
+              <div style="font-size: 12px; color: var(--text-dim);">Limit background bandwidth usage and disable thumbnails to save data.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="data-saver-toggle" onchange="toggleDataSaver(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -316,6 +376,10 @@
     <div class="taskbar-center" id="taskbar-apps">
       <div class="taskbar-btn start-btn" title="Start Menu">✶</div>
     </div>
+    <div class="taskbar-right">
+      <span id="data-saver-status" style="display:none; color: #ffb900;" title="Data Saver Active">⚡ Data Saver</span>
+      <span id="taskbar-clock">00:00</span>
+    </div>
   </div>
 </div>
 
@@ -333,12 +397,18 @@
     { id: 'vscode', name: 'VS Code', icon: '💙', desc: 'Live HTML editor.' },
     { id: 'gd', name: 'Geometry Dash', icon: '🟩', desc: 'Jump over spikes!' },
     { id: 'spotify', name: 'Spotify Music', icon: '🎵', desc: 'Endless song player.' },
-    { id: 'notepad', name: 'Notepad', icon: '📝', desc: 'Simple text editor.' }
+    { id: 'notepad', name: 'Notepad', icon: '📝', desc: 'Simple text editor.' },
+    { id: 'settings', name: 'Settings', icon: '⚙️', desc: 'System settings & Data Saver.' }
   ];
 
-  let systemApps = { store: { id: 'store', name: 'Microsoft Store', icon: '🛍️' } };
+  let systemApps = { 
+    store: { id: 'store', name: 'Microsoft Store', icon: '🛍️' },
+    settings: { id: 'settings', name: 'Settings', icon: '⚙️' }
+  };
   let runningApps = new Set();
   let zIndex = 100;
+  let isDataSaverActive = false;
+  let lastYoutubeResults = [];
 
   window.addEventListener('DOMContentLoaded', () => {
     renderDesktop();
@@ -347,7 +417,30 @@
     initSpotify();
     initGDGame();
     renderTaskbarIcons();
+    setInterval(updateClock, 1000);
+    updateClock();
   });
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('taskbar-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function toggleDataSaver(active) {
+    isDataSaverActive = active;
+    document.getElementById('data-saver-toggle').checked = active;
+    if (active) {
+      document.body.classList.add('data-saver-active');
+      document.getElementById('data-saver-status').style.display = 'inline';
+    } else {
+      document.body.classList.remove('data-saver-active');
+      document.getElementById('data-saver-status').style.display = 'none';
+    }
+    // Re-render YouTube results if any, to hide/show thumbnails
+    if (lastYoutubeResults.length > 0) {
+      renderYouTubeResults(lastYoutubeResults);
+    }
+  }
 
   function renderStoreCatalog() {
     document.getElementById('store-catalog').innerHTML = catalog.map(app => {
@@ -472,21 +565,27 @@
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
-        resultsDiv.innerHTML = data.items.map(item => `
-          <div class="yt-result-card" onclick="playYouTubeVideo('${item.id.videoId}')">
-            <img class="yt-thumb" src="${item.snippet.thumbnails.medium.url}" alt="thumbnail">
-            <div>
-              <div class="yt-title">${item.snippet.title}</div>
-              <div class="yt-channel">${item.snippet.channelTitle}</div>
-            </div>
-          </div>
-        `).join('');
+        lastYoutubeResults = data.items;
+        renderYouTubeResults(data.items);
       } else {
         resultsDiv.innerHTML = '<div style="text-align:center; padding:20px;">No results found.</div>';
       }
     } catch (err) {
       resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Error searching. Did you add your API key?</div>';
     }
+  }
+
+  function renderYouTubeResults(items) {
+    const resultsDiv = document.getElementById('yt-results');
+    resultsDiv.innerHTML = items.map(item => `
+      <div class="yt-result-card" onclick="playYouTubeVideo('${item.id.videoId}')">
+        ${!isDataSaverActive ? `<img class="yt-thumb" src="${item.snippet.thumbnails.medium.url}" alt="thumbnail">` : '<div style="font-size:11px; color:#ffb900; margin-bottom:4px;">[Thumbnail hidden by Data Saver]</div>'}
+        <div>
+          <div class="yt-title">${item.snippet.title}</div>
+          <div class="yt-channel">${item.snippet.channelTitle}</div>
+        </div>
+      </div>
+    `).join('');
   }
 
   function playYouTubeVideo(videoId) {
