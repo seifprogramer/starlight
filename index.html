@@ -88,7 +88,7 @@
     backdrop-filter: blur(30px); border-radius: 12px;
     border: 1px solid var(--glass-border); box-shadow: var(--shadow);
     display: none; flex-direction: column; overflow: hidden;
-    min-width: 300px; min-height: 200px;
+    min-width: 300px; min-height: 200px; z-index: 100;
   }
   .window.open { display: flex; }
   .window.maximized {
@@ -111,7 +111,7 @@
   }
   .win-btn:hover { background: var(--glass-hover); color: #fff; }
   .win-btn.close:hover { background: #e81123; color: #fff; }
-  .win-content { flex: 1; padding: 0; overflow: hidden; position: relative; user-select: text; }
+  .win-content { flex: 1; padding: 0; overflow: hidden; position: relative; user-select: text; display: flex; flex-direction: column; }
 
   /* Store */
   .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; padding: 16px; overflow-y: auto; height: 100%;}
@@ -128,20 +128,20 @@
   .echo-app { width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; }
   .echo-iframe { width: 100%; height: 100%; border: none; background: #0f172a; }
 
-  .vscode-app { display: flex; height: 100%; }
+  .vscode-app { display: flex; height: 100%; width: 100%; }
   .code-input { width: 50%; height: 100%; background: #1e1e1e; color: #d4d4d4; border: none; padding: 12px; font-family: monospace; outline: none; border-right: 1px solid var(--glass-border); resize: none; }
   .code-preview { width: 50%; height: 100%; background: #fff; border: none; }
 
   .gd-app { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { background: #111; border: 1px solid var(--glass-border); border-radius: 8px; }
 
-  .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; }
+  .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; width: 100%; }
   .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); }
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
   .browser-btn { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
   .browser-iframe { flex: 1; border: none; width: 100%; background: #fff; }
 
-  .yt-container { display: flex; flex-direction: column; height: 100%; background: #0f0f0f; color: white; }
+  .yt-container { display: flex; flex-direction: column; height: 100%; background: #0f0f0f; color: white; width: 100%; }
   .yt-header { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid #272727; }
   .yt-search-input { flex: 1; padding: 8px 16px; border-radius: 20px; border: 1px solid #303030; background: #121212; color: white; outline: none; }
   .yt-search-btn { padding: 8px 20px; border-radius: 20px; background: #222; border: 1px solid #303030; color: white; cursor: pointer; }
@@ -155,7 +155,7 @@
   .yt-channel { font-size: 12px; color: #aaa; }
   .yt-player-area { flex: 1; background: #000; display: flex; flex-direction: column; }
 
-  .settings-container { display: flex; height: 100%; background: #181824; color: white; }
+  .settings-container { display: flex; height: 100%; background: #181824; color: white; width: 100%; }
   .settings-sidebar { width: 220px; border-right: 1px solid var(--glass-border); padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
   .settings-tab { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; transition: 0.1s; }
   .settings-tab:hover { background: var(--glass-hover); color: white; }
@@ -545,36 +545,19 @@
     <div class="win-content">
       <div class="browser-container">
         <div class="browser-bar">
-          <input type="text" class="browser-input" id="browser-url" value="https://example.com" placeholder="Enter URL..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
+          <input type="text" class="browser-input" id="browser-url-input" value="https://example.com" onkeydown="if(event.key==='Enter') navigateBrowser()">
           <button class="browser-btn" onclick="navigateBrowser()">Go</button>
         </div>
-        <iframe class="browser-iframe" id="browser-frame" src="https://example.com" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <iframe class="browser-iframe" id="browser-frame" src="https://example.com"></iframe>
       </div>
-    </div>
-  </div>
-
-  <!-- Notepad App -->
-  <div class="window" id="win-notepad" style="width:400px; height:300px; top: 240px; left: 450px;" onmousedown="focusAppWindow('notepad')">
-    <div class="win-titlebar">
-      <div class="win-title"><div class="ico-notepad" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Notepad</div>
-      <div class="win-controls">
-        <div class="win-btn" onclick="minimizeWindow('notepad')">-</div>
-        <div class="win-btn" onclick="toggleMaximize('notepad')">□</div>
-        <div class="win-btn close" onclick="closeWindow('notepad')">✕</div>
-      </div>
-    </div>
-    <div class="win-content">
-      <textarea id="notepad-textarea" style="width:100%; height:100%; background:#1e1e1e; color:#fff; padding:12px; border:none; outline:none; resize:none;" placeholder="Type notes here..." oninput="saveNotepad()"></textarea>
     </div>
   </div>
 
   <!-- Taskbar -->
-  <div class="taskbar">
-    <div class="taskbar-center" id="taskbar-apps" style="justify-content: center;">
-      <div class="taskbar-btn start-btn" title="Start Menu">✶</div>
-    </div>
+  <div class="taskbar" id="taskbar">
+    <button class="taskbar-btn start-btn" onclick="toggleStartMenu()">⊞</button>
+    <div class="taskbar-center" id="taskbar-apps"></div>
     <div class="taskbar-right">
-      <span id="data-saver-status" style="display:none; color: #ffb900;" title="Data Saver Active">⚡ Data Saver</span>
       <span id="taskbar-clock">12:00 PM</span>
     </div>
   </div>
@@ -582,140 +565,144 @@
 
 <script>
   const apps = [
-    { id: 'store', name: 'Microsoft Store', logoClass: 'ico-store' },
-    { id: 'settings', name: 'Settings', logoClass: 'ico-settings' },
-    { id: 'echo', name: 'Echo Play', logoClass: 'ico-echo' },
-    { id: 'gd', name: 'Geometry Dash', logoClass: 'ico-gd' },
-    { id: 'vscode', name: 'VS Code', logoClass: 'ico-vscode' },
-    { id: 'youtube', name: 'YouTube', logoClass: 'ico-youtube' },
-    { id: 'synapse', name: 'Synapse Search', logoClass: 'ico-synapse' },
-    { id: 'grep', name: 'grep.app', logoClass: 'ico-grep' },
-    { id: 'chrome', name: 'Web Browser', logoClass: 'ico-chrome' },
-    { id: 'notepad', name: 'Notepad', logoClass: 'ico-notepad' }
+    { id: 'chrome', name: 'Web Browser', iconClass: 'ico-chrome' },
+    { id: 'gd', name: 'Geometry Dash', iconClass: 'ico-gd' },
+    { id: 'youtube', name: 'YouTube', iconClass: 'ico-youtube' },
+    { id: 'synapse', name: 'Synapse Search', iconClass: 'ico-synapse' },
+    { id: 'grep', name: 'grep.app', iconClass: 'ico-grep' },
+    { id: 'store', name: 'Microsoft Store', iconClass: 'ico-store' },
+    { id: 'settings', name: 'Settings', iconClass: 'ico-settings' },
+    { id: 'echo', name: 'Echo Play', iconClass: 'ico-echo' },
+    { id: 'vscode', name: 'VS Code', iconClass: 'ico-vscode' }
   ];
 
-  let activeWindow = null;
-  let topZIndex = 100;
+  // Render Desktop Icons
+  const desktopEl = document.getElementById('desktop');
+  apps.forEach(app => {
+    const icon = document.createElement('div');
+    icon.className = 'desktop-icon';
+    icon.innerHTML = `<div class="ico ${app.iconClass}"></div><span>${app.name}</span>`;
+    icon.ondblclick = () => openApp(app.id);
+    desktopEl.appendChild(icon);
+  });
 
-  function initOS() {
-    const desktop = document.getElementById('desktop');
-    const taskbarCenter = document.getElementById('taskbar-apps');
-    const storeCatalog = document.getElementById('store-catalog');
-    const settingsAppList = document.getElementById('settings-app-list');
+  // Render Taskbar App Shortcuts
+  const taskbarAppsEl = document.getElementById('taskbar-apps');
+  apps.forEach(app => {
+    const btn = document.createElement('div');
+    btn.className = `taskbar-btn ${app.iconClass}`;
+    btn.id = `tb-${app.id}`;
+    btn.title = app.name;
+    btn.onclick = () => toggleAppWindow(app.id);
+    taskbarAppsEl.appendChild(btn);
+  });
 
-    apps.forEach(app => {
-      // Desktop Icon
-      const icon = document.createElement('div');
-      icon.className = 'desktop-icon';
-      icon.innerHTML = `<div class="ico ${app.logoClass}"></div><span>${app.name}</span>`;
-      icon.ondblclick = () => openWindow(app.id);
-      desktop.appendChild(icon);
+  let highestZ = 200;
 
-      // Taskbar Icon
-      const tBtn = document.createElement('div');
-      tBtn.className = `taskbar-btn ${app.logoClass}`;
-      tBtn.id = `tb-${app.id}`;
-      tBtn.title = app.name;
-      tBtn.onclick = () => toggleWindow(app.id);
-      taskbarCenter.appendChild(tBtn);
-
-      // Store Catalog Card
-      if(storeCatalog) {
-        const card = document.createElement('div');
-        card.className = 'store-card';
-        card.innerHTML = `<div class="ico ${app.logoClass}" style="width:36px; height:36px; border-radius:8px;"></div><strong>${app.name}</strong><div style="font-size:11px; color:var(--text-dim);">Verified Windows 12 Web App package.</div><button class="store-btn" onclick="openWindow('${app.id}')">Launch</button>`;
-        storeCatalog.appendChild(card);
-      }
-
-      // Settings Apps list
-      if(settingsAppList) {
-        const row = document.createElement('div');
-        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:8px 12px; border-radius:6px;";
-        row.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><div class="ico ${app.logoClass}" style="width:24px; height:24px; border-radius:4px;"></div><span>${app.name}</span></div><button class="store-btn" style="background:#e81123;" onclick="alert('${app.name} is a core system component and cannot be uninstalled.')">Manage</button>`;
-        settingsAppList.appendChild(row);
-      }
-    });
-
-    updateClock();
-    setInterval(updateClock, 1000);
-    updateCodePreview();
-    initGeometryDash();
-  }
-
-  function openWindow(id) {
+  function openApp(id) {
     const win = document.getElementById(`win-${id}`);
-    if(!win) return;
-    win.classList.add('open');
-    focusAppWindow(id);
+    if (win) {
+      win.classList.add('open');
+      focusAppWindow(id);
+    }
   }
 
   function closeWindow(id) {
     const win = document.getElementById(`win-${id}`);
-    if(win) win.classList.remove('open');
-    const tb = document.getElementById(`tb-${id}`);
-    if(tb) tb.classList.remove('running');
+    if (win) {
+      win.classList.remove('open', 'maximized');
+      document.getElementById(`tb-${id}`).classList.remove('running');
+    }
   }
 
   function minimizeWindow(id) {
     const win = document.getElementById(`win-${id}`);
-    if(win) win.classList.remove('open');
-  }
-
-  function toggleWindow(id) {
-    const win = document.getElementById(`win-${id}`);
-    if(!win) return;
-    if(win.classList.contains('open')) {
-      minimizeWindow(id);
-    } else {
-      openWindow(id);
-    }
+    if (win) win.classList.remove('open');
   }
 
   function toggleMaximize(id) {
     const win = document.getElementById(`win-${id}`);
-    if(win) win.classList.toggle('maximized');
+    if (win) win.classList.toggle('maximized');
+  }
+
+  function toggleAppWindow(id) {
+    const win = document.getElementById(`win-${id}`);
+    if (!win) return;
+    if (win.classList.contains('open')) {
+      minimizeWindow(id);
+    } else {
+      openApp(id);
+    }
   }
 
   function focusAppWindow(id) {
-    topZIndex++;
     const win = document.getElementById(`win-${id}`);
-    if(win) win.style.zIndex = topZIndex;
-
-    document.querySelectorAll('.taskbar-btn').forEach(b => {
-      if(!b.classList.contains('start-btn')) b.classList.remove('running');
-    });
+    if (win) {
+      highestZ++;
+      win.style.zIndex = highestZ;
+    }
     apps.forEach(a => {
-      const w = document.getElementById(`win-${a.id}`);
       const tb = document.getElementById(`tb-${a.id}`);
-      if(w && w.classList.contains('open') && tb) {
+      const w = document.getElementById(`win-${a.id}`);
+      if (w && w.classList.contains('open')) {
         tb.classList.add('running');
+      } else {
+        tb.classList.remove('running');
       }
     });
-    const currentTb = document.getElementById(`tb-${id}`);
-    if(currentTb) currentTb.classList.add('running');
   }
 
-  function updateClock() {
+  // Window Draggability Logic
+  document.querySelectorAll('.window').forEach(win => {
+    const titlebar = win.querySelector('.win-titlebar');
+    let isDragging = false, startX, startY, initialX, initialY;
+
+    titlebar.onmousedown = (e) => {
+      if (e.target.classList.contains('win-btn')) return;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialX = win.offsetLeft;
+      initialY = win.offsetTop;
+      focusAppWindow(win.id.replace('win-', ''));
+      document.onmousemove = dragMove;
+      document.onmouseup = stopDrag;
+    };
+
+    function dragMove(e) {
+      if (!isDragging) return;
+      win.style.left = `${initialX + (e.clientX - startX)}px`;
+      win.style.top = `${initialY + (e.clientY - startY)}px`;
+      win.classList.remove('maximized');
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      document.onmousemove = null;
+      document.onmouseup = null;
+    }
+  });
+
+  // Clock Update
+  setInterval(() => {
     const now = new Date();
     let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
+    hours = hours % 12 || 12;
     document.getElementById('taskbar-clock').innerText = `${hours}:${minutes} ${ampm}`;
-  }
+  }, 1000);
 
-  function switchSettingsTab(tabName, el) {
+  // Settings & App Helpers
+  function switchSettingsTab(tabId, el) {
     document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
-    const pane = document.getElementById(`pane-${tabName}`);
-    if(pane) pane.classList.add('active');
+    document.getElementById(`pane-${tabId}`).classList.add('active');
   }
 
   function adjustBrightness(val) {
-    const container = document.getElementById('main-container');
-    container.style.filter = `brightness(${val / 100})`;
+    document.getElementById('main-container').style.filter = `brightness(${val}%)`;
   }
 
   function changeAccentColor(color) {
@@ -727,156 +714,133 @@
   }
 
   function changeTaskbarAlignment(align) {
-    document.getElementById('taskbar-apps').style.justifyContent = align;
+    document.getElementById('taskbar-apps').style.transform = align === 'center' ? 'translateX(-50%)' : 'none';
+    document.getElementById('taskbar-apps').style.left = align === 'center' ? '50%' : '56px';
   }
 
   function toggleDataSaver(active) {
-    if(active) {
+    if (active) {
       document.body.classList.add('data-saver-active');
-      document.getElementById('data-saver-status').style.display = 'inline';
       document.getElementById('data-saver-toggle').checked = true;
     } else {
       document.body.classList.remove('data-saver-active');
-      document.getElementById('data-saver-status').style.display = 'none';
       document.getElementById('data-saver-toggle').checked = false;
     }
   }
 
   function toggleAirplaneMode(active) {
-    if(active) {
+    if (active) {
       document.getElementById('setting-wifi').checked = false;
-      alert('Airplane mode enabled. All wireless adapters turned off.');
     } else {
       document.getElementById('setting-wifi').checked = true;
     }
   }
 
-  function saveSettingsState() {}
-
-  function updateCodePreview() {
-    const code = document.getElementById('code-editor').value;
-    const preview = document.getElementById('code-preview');
-    const doc = preview.contentDocument || preview.contentWindow.document;
-    doc.open();
-    doc.write(code);
-    doc.close();
+  function saveSettingsState() {
+    // Stub for persistence
   }
 
+  // VS Code Preview Updater
+  function updateCodePreview() {
+    const code = document.getElementById('code-editor').value;
+    const preview = document.getElementById('code-preview').contentWindow.document;
+    preview.open();
+    preview.write(code);
+    preview.close();
+  }
+  updateCodePreview();
+
+  // Browser Navigation
+  function navigateBrowser() {
+    const url = document.getElementById('browser-url-input').value;
+    document.getElementById('browser-frame').src = url.startsWith('http') ? url : `https://${url}`;
+  }
+
+  // YouTube Mock Search
   function searchYouTube() {
     const query = document.getElementById('yt-search-box').value;
     const resultsContainer = document.getElementById('yt-results');
     resultsContainer.innerHTML = `
-      <div class="yt-result-card" onclick="loadYouTubeEmbed('dQw4w9WgXcQ')">
-        <img class="yt-thumb" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" />
-        <div class="yt-title">${query || 'Never Gonna Give You Up'} - Official HD Video</div>
-        <div class="yt-channel">Windows 12 Media • 1B views</div>
-      </div>
-      <div class="yt-result-card" onclick="loadYouTubeEmbed('5qap5aO4i9A')">
-        <img class="yt-thumb" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=400&auto=format&fit=crop" />
-        <div class="yt-title">Lofi Hip Hop Radio - Beats to Relax/Study to</div>
-        <div class="yt-channel">Lofi Girl • Live Stream</div>
+      <div class="yt-result-card" onclick="loadYTPlayer('dQw4w9WgXcQ')">
+        <img class="yt-thumb" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" />
+        <div class="yt-title">${query || 'Sample Video'} - Official Stream</div>
+        <div class="yt-channel">Quantum Network</div>
       </div>
     `;
   }
 
-  function loadYouTubeEmbed(videoId) {
+  function loadYTPlayer(videoId) {
     document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
   }
 
-  function navigateBrowser() {
-    const urlInput = document.getElementById('browser-url').value;
-    let target = urlInput;
-    if(!target.startsWith('http://') && !target.startsWith('https://')) {
-      target = 'https://' + target;
+  // Geometry Dash Mini Game Loop
+  const canvas = document.getElementById('gdCanvas');
+  const ctx = canvas.getContext('2d');
+  let cube = { x: 50, y: 220, size: 30, vy: 0, gravity: 0.8, jump: -12, grounded: false };
+  let obstacles = [];
+  let score = 0;
+  let highScore = 0;
+  let gameRunning = true;
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && cube.grounded) {
+      cube.vy = cube.jump;
+      cube.grounded = false;
     }
-    document.getElementById('browser-frame').src = target;
-  }
+  });
 
-  function saveNotepad() {}
+  canvas.onclick = () => {
+    if (cube.grounded) {
+      cube.vy = cube.jump;
+      cube.grounded = false;
+    }
+  };
 
-  function initGeometryDash() {
-    const canvas = document.getElementById('gdCanvas');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    
-    let cube = { x: 50, y: 220, size: 24, vy: 0, gravity: 0.8, jumpForce: -12, grounded: false };
-    let obstacles = [];
-    let score = 0;
-    let highScore = 0;
-    let gameRunning = true;
-    let frameCount = 0;
+  function updateGD() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    window.addEventListener('keydown', (e) => {
-      if(e.code === 'Space') {
-        jumpCube();
-        e.preventDefault();
+    // Apply gravity
+    cube.vy += cube.gravity;
+    cube.y += cube.vy;
+
+    if (cube.y > 220) {
+      cube.y = 220;
+      cube.vy = 0;
+      cube.grounded = true;
+    }
+
+    // Draw Player Cube
+    ctx.fillStyle = '#f1c40f';
+    ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
+
+    // Obstacles spawn & move
+    if (Math.random() < 0.02) {
+      obstacles.push({ x: canvas.width, y: 230, w: 20, h: 20 });
+    }
+
+    ctx.fillStyle = '#e74c3c';
+    obstacles.forEach((obs, index) => {
+      obs.x -= 4;
+      ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+      // Collision detection
+      if (cube.x < obs.x + obs.w && cube.x + cube.size > obs.x && cube.y < obs.y + obs.h && cube.y + cube.size > obs.y) {
+        highScore = Math.max(score, highScore);
+        score = 0;
+        obstacles = [];
+      }
+
+      if (obs.x + obs.w < 0) {
+        obstacles.splice(index, 1);
+        score += 10;
       }
     });
-    canvas.onclick = () => jumpCube();
 
-    function jumpCube() {
-      if(cube.grounded) {
-        cube.vy = cube.jumpForce;
-        cube.grounded = false;
-      }
-    }
-
-    function loop() {
-      if(!gameRunning) return;
-      frameCount++;
-
-      ctx.fillStyle = '#111';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = '#00ffcc';
-      ctx.fillRect(0, 244, canvas.width, 4);
-
-      cube.vy += cube.gravity;
-      cube.y += cube.vy;
-      if(cube.y >= 220) {
-        cube.y = 220;
-        cube.vy = 0;
-        cube.grounded = true;
-      }
-
-      ctx.fillStyle = '#ff0055';
-      ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
-
-      if(frameCount % 90 === 0) {
-        obstacles.push({ x: canvas.width, y: 224, width: 20, height: 20, speed: 5 });
-      }
-
-      for(let i = obstacles.length - 1; i >= 0; i--) {
-        let obs = obstacles[i];
-        obs.x -= obs.speed;
-        ctx.fillStyle = '#00ffcc';
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-        if(
-          cube.x < obs.x + obs.width &&
-          cube.x + cube.size > obs.x &&
-          cube.y < obs.y + obs.height &&
-          cube.y + cube.size > obs.y
-        ) {
-          if(score > highScore) highScore = score;
-          score = 0;
-          obstacles = [];
-          frameCount = 0;
-        }
-
-        if(obs.x + obs.width < 0) {
-          obstacles.splice(i, 1);
-          score += 10;
-        }
-      }
-
-      document.getElementById('gd-score-board').innerText = `Score: ${score} | High Score: ${highScore} (Press SPACE/Click to Jump)`;
-      requestAnimationFrame(loop);
-    }
-    loop();
+    document.getElementById('gd-score-board').innerText = `Score: ${score} | High Score: ${highScore}`;
+    requestAnimationFrame(updateGD);
   }
-
-  window.onload = initOS;
+  updateGD();
 </script>
 </body>
 </html>
