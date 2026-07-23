@@ -40,22 +40,22 @@
   .desktop-icon .ico {
     width: 48px; height: 48px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    background-size: cover; background-position: center;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
     border: 1px solid var(--glass-border);
   }
   .desktop-icon span { font-size: 11px; text-shadow: 0 1px 4px rgba(0,0,0,0.8); text-align: center; }
 
-  /* Unsplash Logo Background Images - Official Exact Brands */
-  .ico-store { background-image: url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-settings { background-image: url('https://images.unsplash.com/photo-1614680376593-902f749f7ffc?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-echo { background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-gd { background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-vscode { background-image: url('https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-youtube { background-image: url('https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-synapse { background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-grep { background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-chrome { background-image: url('https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?q=80&w=200&auto=format&fit=crop') !important; }
-  .ico-notepad { background-image: url('https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=200&auto=format&fit=crop') !important; }
+  /* Exact Logo Images Provided */
+  .ico-chrome { background-image: url('https://static.vecteezy.com/system/resources/previews/022/484/495/original/google-chrome-icon-logo-symbol-free-png.png') !important; }
+  .ico-gd { background-image: url('https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0&adlt=strict') !important; }
+  .ico-youtube { background-image: url('https://cdn.shopify.com/s/files/1/2081/8163/files/youtubeLogo.webp') !important; }
+  .ico-synapse { background-image: url('https://tse1.mm.bing.net/th/id/OIP.pqvu0oeZO6l5h8w2tABFcAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3&adlt=strict') !important; }
+  .ico-grep { background-image: url('https://repository-images.githubusercontent.com/986615061/87846035-43c5-422d-a8aa-00afee1bc478') !important; }
+  .ico-store { background-image: url('https://static.vecteezy.com/system/resources/previews/015/337/677/original/transparent-search-icon-free-png.png') !important; }
+  .ico-settings { background-image: url('https://static.vecteezy.com/system/resources/previews/021/190/084/original/settings-filled-icon-in-transparent-background-basic-app-and-web-ui-bold-line-icon-eps10-free-vector.jpg') !important; }
+  .ico-echo { background-image: url('https://tse4.mm.bing.net/th/id/OIP.ShjxoZM13hUS5czzs0bHvwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3&adlt=strict') !important; }
+  .ico-vscode { background-image: url('https://tse4.mm.bing.net/th/id/OIP.LOMTtfy2luyzy6zJleiIjQHaFN?r=0&rs=1&pid=ImgDetMain&o=7&rm=3&adlt=strict') !important; }
+  .ico-notepad { background-image: url('https://static.vecteezy.com/system/resources/previews/021/190/084/original/settings-filled-icon-in-transparent-background-basic-app-and-web-ui-bold-line-icon-eps10-free-vector.jpg') !important; }
 
   /* Taskbar */
   .taskbar {
@@ -71,11 +71,11 @@
     width: 40px; height: 40px; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; position: relative;
-    background-size: cover; background-position: center;
+    background-size: 60%; background-repeat: no-repeat; background-position: center;
     border: 1px solid var(--glass-border);
   }
   .taskbar-btn:hover { background-color: var(--glass-hover); }
-  .start-btn { background: linear-gradient(135deg, var(--accent), #005a9e); color: white; border-radius: 8px; border: none; font-size: 20px; }
+  .start-btn { background: linear-gradient(135deg, var(--accent), #005a9e); color: white; border-radius: 8px; border: none; font-size: 20px; background-size: auto; }
   
   .taskbar-btn.running::after {
     content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px;
@@ -198,7 +198,7 @@
   <!-- Microsoft Store Window -->
   <div class="window" id="win-store" style="width:720px; height:500px; top: 50px; left: 50px;" onmousedown="focusAppWindow('store')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-store" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Microsoft Store</div>
+      <div class="win-title"><div class="ico-store" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Microsoft Store</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('store')">-</div>
         <div class="win-btn" onclick="toggleMaximize('store')">□</div>
@@ -213,7 +213,7 @@
   <!-- Settings App -->
   <div class="window" id="win-settings" style="width:780px; height:520px; top: 80px; left: 100px;" onmousedown="focusAppWindow('settings')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-settings" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Settings</div>
+      <div class="win-title"><div class="ico-settings" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Settings</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('settings')">-</div>
         <div class="win-btn" onclick="toggleMaximize('settings')">□</div>
@@ -420,7 +420,7 @@
   <!-- Echo Play App -->
   <div class="window" id="win-echo" style="width:750px; height:500px; top: 130px; left: 180px;" onmousedown="focusAppWindow('echo')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-echo" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Echo Play</div>
+      <div class="win-title"><div class="ico-echo" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Echo Play</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('echo')">-</div>
         <div class="win-btn" onclick="toggleMaximize('echo')">□</div>
@@ -437,7 +437,7 @@
   <!-- Geometry Dash App -->
   <div class="window" id="win-gd" style="width:520px; height:400px; top: 140px; left: 200px;" onmousedown="focusAppWindow('gd')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-gd" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Geometry Dash</div>
+      <div class="win-title"><div class="ico-gd" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Geometry Dash</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('gd')">-</div>
         <div class="win-btn" onclick="toggleMaximize('gd')">□</div>
@@ -455,7 +455,7 @@
   <!-- VS Code App -->
   <div class="window" id="win-vscode" style="width:700px; height:450px; top: 160px; left: 250px;" onmousedown="focusAppWindow('vscode')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-vscode" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> VS Code</div>
+      <div class="win-title"><div class="ico-vscode" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> VS Code</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('vscode')">-</div>
         <div class="win-btn" onclick="toggleMaximize('vscode')">□</div>
@@ -473,7 +473,7 @@
   <!-- YouTube App -->
   <div class="window" id="win-youtube" style="width:850px; height:550px; top: 180px; left: 300px;" onmousedown="focusAppWindow('youtube')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-youtube" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> YouTube</div>
+      <div class="win-title"><div class="ico-youtube" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> YouTube</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('youtube')">-</div>
         <div class="win-btn" onclick="toggleMaximize('youtube')">□</div>
@@ -501,7 +501,7 @@
   <!-- Synapse Search App -->
   <div class="window" id="win-synapse" style="width:800px; height:520px; top: 190px; left: 320px;" onmousedown="focusAppWindow('synapse')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-synapse" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Synapse Search</div>
+      <div class="win-title"><div class="ico-synapse" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Synapse Search</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('synapse')">-</div>
         <div class="win-btn" onclick="toggleMaximize('synapse')">□</div>
@@ -518,7 +518,7 @@
   <!-- Grep.app Embedded App -->
   <div class="window" id="win-grep" style="width:750px; height:500px; top: 200px; left: 350px;" onmousedown="focusAppWindow('grep')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-grep" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> grep.app</div>
+      <div class="win-title"><div class="ico-grep" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> grep.app</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('grep')">-</div>
         <div class="win-btn" onclick="toggleMaximize('grep')">□</div>
@@ -535,7 +535,7 @@
   <!-- Standard Web Browser App -->
   <div class="window" id="win-chrome" style="width:780px; height:500px; top: 220px; left: 400px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-chrome" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Web Browser</div>
+      <div class="win-title"><div class="ico-chrome" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Web Browser</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('chrome')">-</div>
         <div class="win-btn" onclick="toggleMaximize('chrome')">□</div>
@@ -556,7 +556,7 @@
   <!-- Notepad App -->
   <div class="window" id="win-notepad" style="width:400px; height:300px; top: 240px; left: 450px;" onmousedown="focusAppWindow('notepad')">
     <div class="win-titlebar">
-      <div class="win-title"><div class="ico-notepad" style="width:16px;height:16px;border-radius:3px;background-size:cover;background-position:center;display:inline-block;"></div> Notepad</div>
+      <div class="win-title"><div class="ico-notepad" style="width:16px;height:16px;border-radius:3px;background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;"></div> Notepad</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('notepad')">-</div>
         <div class="win-btn" onclick="toggleMaximize('notepad')">□</div>
