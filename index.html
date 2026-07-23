@@ -119,6 +119,21 @@
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
   .browser-btn { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
   .browser-iframe { flex: 1; border: none; width: 100%; background: #fff; }
+
+  /* YouTube App Styling */
+  .yt-container { display: flex; flex-direction: column; height: 100%; background: #0f0f0f; color: white; }
+  .yt-header { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid #272727; }
+  .yt-search-input { flex: 1; padding: 8px 16px; border-radius: 20px; border: 1px solid #303030; background: #121212; color: white; outline: none; }
+  .yt-search-btn { padding: 8px 20px; border-radius: 20px; background: #222; border: 1px solid #303030; color: white; cursor: pointer; }
+  .yt-search-btn:hover { background: #303030; }
+  .yt-body { display: flex; flex: 1; overflow: hidden; }
+  .yt-sidebar { width: 280px; overflow-y: auto; padding: 12px; border-right: 1px solid #272727; display: flex; flex-direction: column; gap: 12px; }
+  .yt-result-card { display: flex; flex-direction: column; gap: 8px; cursor: pointer; border-radius: 8px; transition: background 0.2s; padding: 8px; }
+  .yt-result-card:hover { background: #272727; }
+  .yt-thumb { width: 100%; border-radius: 8px; aspect-ratio: 16/9; object-fit: cover; }
+  .yt-title { font-size: 14px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .yt-channel { font-size: 12px; color: #aaa; }
+  .yt-player-area { flex: 1; background: #000; display: flex; flex-direction: column; }
 </style>
 </head>
 <body>
@@ -204,8 +219,8 @@
     </div>
   </div>
 
-  <!-- YouTube App -->
-  <div class="window" id="win-youtube" style="width:680px; height:420px;">
+  <!-- YouTube App (Now with Search!) -->
+  <div class="window" id="win-youtube" style="width:850px; height:550px;">
     <div class="win-titlebar">
       <div class="win-title"><span>▶️</span> YouTube</div>
       <div class="win-controls">
@@ -215,11 +230,24 @@
       </div>
     </div>
     <div class="win-content">
-      <iframe src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <div class="yt-container">
+        <div class="yt-header">
+          <input type="text" class="yt-search-input" id="yt-search-box" placeholder="Search YouTube..." onkeydown="if(event.key==='Enter') searchYouTube()">
+          <button class="yt-search-btn" onclick="searchYouTube()">Search</button>
+        </div>
+        <div class="yt-body">
+          <div class="yt-sidebar" id="yt-results">
+            <div style="text-align:center; color:#aaa; margin-top:20px;">Search for a video or live stream!</div>
+          </div>
+          <div class="yt-player-area">
+            <iframe id="yt-player" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Chrome Browser App (Using Vercel Proxy Route) -->
+  <!-- Chrome Browser App -->
   <div class="window" id="win-chrome" style="width:780px; height:500px;">
     <div class="win-titlebar">
       <div class="win-title"><span>🌐</span> Chrome Browser</div>
@@ -265,12 +293,18 @@
 </div>
 
 <script>
+  // ==============================================
+  // PASTE YOUR YOUTUBE API KEY BELOW
+  // ==============================================
+  const YOUTUBE_API_KEY = "AIzaSyAYB2OcA499t3O83fy5IZjI6zP-1ktFnRw"; 
+  // ==============================================
+
   const catalog = [
-    { id: 'spotify', name: 'Spotify Music', icon: '🎵', desc: 'Endless song player.' },
-    { id: 'gd', name: 'Geometry Dash', icon: '🟩', desc: 'Jump over spikes!' },
-    { id: 'vscode', name: 'VS Code', icon: '💙', desc: 'Live HTML editor.' },
-    { id: 'youtube', name: 'YouTube', icon: '▶️', desc: 'Video streaming player.' },
+    { id: 'youtube', name: 'YouTube', icon: '▶️', desc: 'Search and watch videos.' },
     { id: 'chrome', name: 'Chrome Browser', icon: '🌐', desc: 'Proxy browser engine.' },
+    { id: 'vscode', name: 'VS Code', icon: '💙', desc: 'Live HTML editor.' },
+    { id: 'gd', name: 'Geometry Dash', icon: '🟩', desc: 'Jump over spikes!' },
+    { id: 'spotify', name: 'Spotify Music', icon: '🎵', desc: 'Endless song player.' },
     { id: 'notepad', name: 'Notepad', icon: '📝', desc: 'Simple text editor.' }
   ];
 
@@ -330,6 +364,7 @@
     const win = document.getElementById(`win-${id}`);
     if (win) win.classList.remove('open');
     if (id === 'spotify') document.getElementById('audio-player').pause();
+    if (id === 'youtube') document.getElementById('yt-player').src = ""; // Stop video
   }
 
   function minimizeWindow(id) {
@@ -339,6 +374,40 @@
   function toggleMaximize(id) {
     const win = document.getElementById(`win-${id}`);
     if (win) win.classList.toggle('maximized');
+  }
+
+  /* YouTube Search Engine */
+  async function searchYouTube() {
+    const query = document.getElementById('yt-search-box').value;
+    if (!query) return;
+    
+    const resultsDiv = document.getElementById('yt-results');
+    resultsDiv.innerHTML = '<div style="text-align:center; padding:20px;">Searching...</div>';
+
+    try {
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        resultsDiv.innerHTML = data.items.map(item => `
+          <div class="yt-result-card" onclick="playYouTubeVideo('${item.id.videoId}')">
+            <img class="yt-thumb" src="${item.snippet.thumbnails.medium.url}" alt="thumbnail">
+            <div>
+              <div class="yt-title">${item.snippet.title}</div>
+              <div class="yt-channel">${item.snippet.channelTitle}</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        resultsDiv.innerHTML = '<div style="text-align:center; padding:20px;">No results found.</div>';
+      }
+    } catch (err) {
+      resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Error searching. Did you add your API key?</div>';
+    }
+  }
+
+  function playYouTubeVideo(videoId) {
+    document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
   }
 
   /* Chrome Proxy Browser Navigator */
@@ -415,38 +484,31 @@
     canvas.addEventListener('click', jump);
 
     function gameLoop() {
-      // Cube Physics
       cube.dy += 0.55; cube.y += cube.dy;
       if (cube.y >= 226) { cube.y = 226; cube.grounded = true; cube.rotation = 0; }
       else { cube.rotation += 8; }
 
-      // Obstacle Movement
       obstacles.forEach(obs => {
         obs.x -= speed;
         if (obs.x < -30) {
           obs.x = canvas.width + Math.random() * 150;
           score++;
         }
-
-        // Collision Check
         if (cube.x < obs.x + obs.w && cube.x + cube.size > obs.x &&
             cube.y < 250 && cube.y + cube.size > 250 - obs.h) {
-          cube.y = 226; score = 0; obs.x = canvas.width + 100; // Reset on death
+          cube.y = 226; score = 0; obs.x = canvas.width + 100;
         }
       });
 
-      // Drawing
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#00ffcc'; ctx.fillRect(0, 250, canvas.width, 50); // Floor
+      ctx.fillStyle = '#00ffcc'; ctx.fillRect(0, 250, canvas.width, 50);
 
-      // Draw Cube with Rotation
       ctx.save();
       ctx.translate(cube.x + 12, cube.y + 12);
       ctx.rotate((cube.rotation * Math.PI) / 180);
       ctx.fillStyle = '#ff0055'; ctx.fillRect(-12, -12, cube.size, cube.size);
       ctx.restore();
 
-      // Draw Spike Obstacles
       ctx.fillStyle = '#ffcc00';
       obstacles.forEach(obs => {
         ctx.beginPath();
@@ -456,7 +518,6 @@
         ctx.fill();
       });
 
-      // Draw Score
       ctx.fillStyle = '#fff'; ctx.font = '14px sans-serif';
       ctx.fillText(`Score: ${score}`, 16, 26);
 
