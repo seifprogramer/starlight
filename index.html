@@ -54,10 +54,17 @@
   .taskbar-btn {
     width: 40px; height: 40px; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 20px;
+    cursor: pointer; font-size: 20px; position: relative;
   }
   .taskbar-btn:hover { background: var(--glass-hover); }
   .start-btn { background: linear-gradient(135deg, var(--accent), #005a9e); color: white; border-radius: 8px; }
+  
+  /* Running taskbar indicator dot & active state */
+  .taskbar-btn.running::after {
+    content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px;
+    background: var(--text); border-radius: 50%;
+  }
+  .taskbar-btn.active { background: var(--glass-hover); }
 
   /* Window Engine */
   .window {
@@ -142,7 +149,7 @@
   <div class="desktop" id="desktop"></div>
 
   <!-- Microsoft Store Window -->
-  <div class="window" id="win-store" style="width:720px; height:500px;">
+  <div class="window" id="win-store" style="width:720px; height:500px;" onmousedown="focusAppWindow('store')">
     <div class="win-titlebar">
       <div class="win-title"><span>🛍️</span> Microsoft Store</div>
       <div class="win-controls">
@@ -157,7 +164,7 @@
   </div>
 
   <!-- Spotify Endless App -->
-  <div class="window" id="win-spotify" style="width:380px; height:430px;">
+  <div class="window" id="win-spotify" style="width:380px; height:430px;" onmousedown="focusAppWindow('spotify')">
     <div class="win-titlebar">
       <div class="win-title"><span>🎵</span> Spotify (Endless Playback)</div>
       <div class="win-controls">
@@ -182,7 +189,7 @@
   </div>
 
   <!-- Geometry Dash App -->
-  <div class="window" id="win-gd" style="width:520px; height:400px;">
+  <div class="window" id="win-gd" style="width:520px; height:400px;" onmousedown="focusAppWindow('gd')">
     <div class="win-titlebar">
       <div class="win-title"><span>🟩</span> Geometry Dash</div>
       <div class="win-controls">
@@ -200,7 +207,7 @@
   </div>
 
   <!-- VS Code App -->
-  <div class="window" id="win-vscode" style="width:700px; height:450px;">
+  <div class="window" id="win-vscode" style="width:700px; height:450px;" onmousedown="focusAppWindow('vscode')">
     <div class="win-titlebar">
       <div class="win-title"><span>💙</span> VS Code</div>
       <div class="win-controls">
@@ -219,8 +226,8 @@
     </div>
   </div>
 
-  <!-- YouTube App (Hidden instead of clearing src on close so audio continues) -->
-  <div class="window" id="win-youtube" style="width:850px; height:550px;">
+  <!-- YouTube App -->
+  <div class="window" id="win-youtube" style="width:850px; height:550px;" onmousedown="focusAppWindow('youtube')">
     <div class="win-titlebar">
       <div class="win-title"><span>▶️</span> YouTube</div>
       <div class="win-controls">
@@ -248,7 +255,7 @@
   </div>
 
   <!-- Chrome Browser App -->
-  <div class="window" id="win-chrome" style="width:780px; height:500px;">
+  <div class="window" id="win-chrome" style="width:780px; height:500px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
       <div class="win-title"><span>🌐</span> Chrome Browser</div>
       <div class="win-controls">
@@ -269,7 +276,7 @@
   </div>
 
   <!-- Notepad App -->
-  <div class="window" id="win-notepad" style="width:400px; height:300px;">
+  <div class="window" id="win-notepad" style="width:400px; height:300px;" onmousedown="focusAppWindow('notepad')">
     <div class="win-titlebar">
       <div class="win-title"><span>📝</span> Notepad</div>
       <div class="win-controls">
@@ -285,16 +292,15 @@
 
   <!-- Taskbar -->
   <div class="taskbar">
-    <div class="taskbar-center">
-      <div class="taskbar-btn start-btn">✶</div>
-      <div class="taskbar-btn" onclick="openApp('store')">🛍️</div>
+    <div class="taskbar-center" id="taskbar-apps">
+      <div class="taskbar-btn start-btn" title="Start Menu">✶</div>
     </div>
   </div>
 </div>
 
 <script>
   // ==============================================
-  // PASTE YOUR YOUTUBE API KEY BELOW
+  // YOUTUBE API KEY INSERTED
   // ==============================================
   const YOUTUBE_API_KEY = "AIzaSyAYB2OcA499t3O83fy5IZjI6zP-1ktFnRw"; 
   // ==============================================
@@ -309,6 +315,7 @@
   ];
 
   let systemApps = { store: { id: 'store', name: 'Microsoft Store', icon: '🛍️' } };
+  let runningApps = new Set();
   let zIndex = 100;
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -317,6 +324,7 @@
     updateCodePreview();
     initSpotify();
     initGDGame();
+    renderTaskbarIcons();
   });
 
   function renderStoreCatalog() {
@@ -350,6 +358,27 @@
     `).join('');
   }
 
+  function renderTaskbarIcons() {
+    const taskbarCenter = document.getElementById('taskbar-apps');
+    let html = `<div class="taskbar-btn start-btn" title="Start Menu">✶</div>`;
+    
+    runningApps.forEach(id => {
+      const app = catalog.find(c => c.id === id) || systemApps[id];
+      if (app) {
+        const win = document.getElementById(`win-${id}`);
+        const isOpen = win && win.classList.contains('open');
+        const isTop = win && parseInt(win.style.zIndex || 0) === zIndex;
+        
+        html += `
+          <div class="taskbar-btn running ${isOpen && isTop ? 'active' : ''}" onclick="toggleAppWindow('${id}')" title="${app.name}">
+            ${app.icon}
+          </div>
+        `;
+      }
+    });
+    taskbarCenter.innerHTML = html;
+  }
+
   /* Window Management Engine */
   function openApp(id) {
     const win = document.getElementById(`win-${id}`);
@@ -357,6 +386,35 @@
       win.classList.add('open');
       if (!win.style.left) { win.style.left = '120px'; win.style.top = '60px'; }
       win.style.zIndex = ++zIndex;
+      runningApps.add(id);
+      renderTaskbarIcons();
+    }
+  }
+
+  function focusAppWindow(id) {
+    const win = document.getElementById(`win-${id}`);
+    if (win) {
+      win.style.zIndex = ++zIndex;
+      renderTaskbarIcons();
+    }
+  }
+
+  function toggleAppWindow(id) {
+    const win = document.getElementById(`win-${id}`);
+    if (win) {
+      if (win.classList.contains('open')) {
+        if (parseInt(win.style.zIndex) === zIndex) {
+          win.classList.remove('open');
+          renderTaskbarIcons();
+        } else {
+          win.style.zIndex = ++zIndex;
+          renderTaskbarIcons();
+        }
+      } else {
+        win.classList.add('open');
+        win.style.zIndex = ++zIndex;
+        renderTaskbarIcons();
+      }
     }
   }
 
@@ -364,11 +422,14 @@
     const win = document.getElementById(`win-${id}`);
     if (win) win.classList.remove('open');
     if (id === 'spotify') document.getElementById('audio-player').pause();
-    // Removed the line clearing the YouTube iframe src, so audio continues playing in the background!
+    runningApps.delete(id);
+    renderTaskbarIcons();
   }
 
   function minimizeWindow(id) {
-    closeWindow(id);
+    const win = document.getElementById(`win-${id}`);
+    if (win) win.classList.remove('open');
+    renderTaskbarIcons();
   }
 
   function toggleMaximize(id) {
@@ -534,6 +595,8 @@
       dragged = bar.closest('.window');
       ox = e.clientX - dragged.offsetLeft; oy = e.clientY - dragged.offsetTop;
       dragged.style.zIndex = ++zIndex;
+      const appId = dragged.id.replace('win-', '');
+      focusAppWindow(appId);
     });
     document.addEventListener('mousemove', e => {
       if (dragged && !dragged.classList.contains('maximized')) {
