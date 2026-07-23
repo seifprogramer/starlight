@@ -123,7 +123,7 @@
   .gd-app { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { background: #111; border: 1px solid var(--glass-border); border-radius: 8px; }
 
-  /* Web Browser App with Fallback Notice & Proxy Search */
+  /* Standard Web Browser App with Form Search Bypass */
   .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; }
   .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); align-items: center; }
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
@@ -537,7 +537,7 @@
     </div>
   </div>
 
-  <!-- Web Browser App with Smart Proxy & Safe Fallback -->
+  <!-- Standard Web Browser App with Search Bypass & Safe Frame Fallback -->
   <div class="window" id="win-chrome" style="width:780px; height:500px; top: 220px; left: 400px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
       <div class="win-title"><span>🌐</span> Web Browser</div>
@@ -551,7 +551,7 @@
       <div class="browser-container">
         <div class="browser-bar">
           <button class="browser-home" onclick="loadBrowserHome()" title="Home Dashboard">🏠 Home</button>
-          <input type="text" class="browser-input" id="browser-url" value="home://dashboard" placeholder="Enter URL or search query..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
+          <input type="text" class="browser-input" id="browser-url" value="https://example.com" placeholder="Enter URL or search query..." onkeydown="if(event.key==='Enter') navigateBrowser()" />
           <button class="browser-btn" onclick="navigateBrowser()">Go</button>
         </div>
         <iframe class="browser-iframe" id="browser-frame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
@@ -625,8 +625,13 @@
     initDraggableWindows();
     loadBrowserHome();
     
+    // Load saved Notepad
     document.getElementById('notepad-textarea').value = localStorage.getItem('win12_notepad') || '';
+    
+    // VS Code initial render
     updateCodePreview();
+    
+    // Start Geometry Dash Loop
     initGeometryDash();
   }
 
@@ -714,6 +719,7 @@
 
       header.addEventListener('mousedown', (e) => {
         if(e.target.classList.contains('win-btn') || e.target.parentElement.classList.contains('win-btn')) return;
+        
         isDragging = true;
         startX = e.clientX; startY = e.clientY;
         initialX = win.offsetLeft; initialY = win.offsetTop;
@@ -766,6 +772,7 @@
       document.body.classList.remove('data-saver-active');
       document.getElementById('data-saver-status').style.display = 'none';
     }
+    if(document.getElementById('yt-search-box').value) searchYouTube();
   }
 
   function startClock() {
@@ -844,6 +851,7 @@
   // APP SPECIFIC LOGIC
   // ==============================================
   
+  // VS Code
   function updateCodePreview() {
     const html = document.getElementById('code-editor').value;
     const iframe = document.getElementById('code-preview');
@@ -851,6 +859,7 @@
     doc.open(); doc.write(html); doc.close();
   }
 
+  // Spotify (Mock)
   let isPlaying = false;
   function toggleAudio() {
     isPlaying = !isPlaying;
@@ -860,6 +869,7 @@
   function nextTrack() { document.getElementById('sp-title').innerText = 'Next Track Loaded...'; }
   function prevTrack() { document.getElementById('sp-title').innerText = 'Previous Track...'; }
 
+  // YouTube App
   async function searchYouTube() {
     const query = document.getElementById('yt-search-box').value;
     const sidebar = document.getElementById('yt-results');
@@ -880,7 +890,12 @@
             document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${item.id.videoId}?autoplay=1`;
           };
           
-          let thumbHTML = !isDataSaver ? `<img src="${item.snippet.thumbnails.medium.url}" class="yt-thumb">` : `<div class="yt-thumb" style="background:#222; display:flex; align-items:center; justify-content:center; color:#555;">[Data Saver]</div>`;
+          let thumbHTML = '';
+          if(!isDataSaver) {
+            thumbHTML = `<img src="${item.snippet.thumbnails.medium.url}" class="yt-thumb">`;
+          } else {
+            thumbHTML = `<div class="yt-thumb" style="background:#222; display:flex; align-items:center; justify-content:center; color:#555;">[Data Saver]</div>`;
+          }
 
           card.innerHTML = `
             ${thumbHTML}
@@ -895,9 +910,7 @@
     }
   }
 
-  // ==============================================
-  // WEB BROWSER PROXY FIX (Bypasses Frame Blocks)
-  // ==============================================
+  // Standard Web Browser App with Search and Safe Homepage Dashboard
   function loadBrowserHome() {
     document.getElementById('browser-url').value = 'home://dashboard';
     const iframe = document.getElementById('browser-frame');
@@ -908,26 +921,23 @@
       <html>
       <head>
         <style>
-          body { font-family: 'Segoe UI', sans-serif; background: #121218; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          body { font-family: 'Segoe UI', sans-serif; background: #121218; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
           .search-box { width: 500px; max-width: 90%; display: flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; overflow: hidden; padding: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
           .search-input { flex: 1; background: transparent; border: none; padding: 12px 20px; color: #fff; font-size: 16px; outline: none; }
           .search-btn { background: #0078d4; color: #fff; border: none; padding: 10px 24px; border-radius: 24px; font-weight: 600; cursor: pointer; }
-          .quick-links { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+          .quick-links { display: flex; gap: 16px; margin-top: 24px; }
           .link-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; color: #aaa; text-decoration: none; font-size: 13px; cursor: pointer; }
           .link-chip:hover { background: rgba(255,255,255,0.15); color: #fff; }
-          .notice { font-size: 12px; color: #f39c12; margin-bottom: 16px; background: rgba(243,156,18,0.1); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(243,156,18,0.3); }
         </style>
       </head>
       <body>
-        <h1 style="margin-bottom: 12px; font-weight: 300; letter-spacing: 1px;">Windows 12 Web Explorer</h1>
-        <div class="notice">💡 Major sites (like Google/Wikipedia) block direct embedding. Sites below are proxy-compatible or reader-ready:</div>
+        <h1 style="margin-bottom: 20px; font-weight: 300; letter-spacing: 1px;">Windows 12 Web Explorer</h1>
         <div class="search-box">
           <input type="text" class="search-input" id="home-q" placeholder="Search the web or type a URL..." onkeydown="if(event.key==='Enter') doSearch()">
-          <button class="search-btn" onclick="doSearch()">Go</button>
+          <button class="search-btn" onclick="doSearch()">Search</button>
         </div>
         <div class="quick-links">
-          <span class="link-chip" onclick="window.parent.navigateUrl('https://lite.cnn.com')">CNN Lite</span>
-          <span class="link-chip" onclick="window.parent.navigateUrl('https://text.npr.org')">NPR News</span>
+          <span class="link-chip" onclick="window.parent.navigateUrl('https://en.wikipedia.org')">Wikipedia</span>
           <span class="link-chip" onclick="window.parent.navigateUrl('https://news.ycombinator.com')">Hacker News</span>
           <span class="link-chip" onclick="window.parent.navigateUrl('https://example.com')">Example Site</span>
         </div>
@@ -971,6 +981,7 @@
     document.getElementById('browser-frame').src = url;
   }
 
+  // Geometry Dash Mini Game
   function initGeometryDash() {
     const canvas = document.getElementById('gdCanvas');
     const ctx = canvas.getContext('2d');
@@ -1059,6 +1070,7 @@
   }
 
   window.onload = initOS;
+
 </script>
 </body>
 </html>
