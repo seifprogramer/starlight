@@ -45,6 +45,18 @@
   }
   .desktop-icon span { font-size: 11px; text-shadow: 0 1px 4px rgba(0,0,0,0.8); text-align: center; }
 
+  /* Logo Specific Styling */
+  .ico-store { background: linear-gradient(135deg, #00188f, #00bcf2) !important; color: white; border: none !important; }
+  .ico-settings { background: #333333 !important; color: #00bcf2 !important; border: none !important; }
+  .ico-echo { background: linear-gradient(135deg, #10b981, #047857) !important; color: white; border: none !important; }
+  .ico-gd { background: linear-gradient(135deg, #00ffcc, #006644) !important; color: #000 !important; font-weight: bold; border: none !important; }
+  .ico-vscode { background: #0066b8 !important; color: white !important; border: none !important; }
+  .ico-youtube { background: #ff0000 !important; color: white !important; border: none !important; }
+  .ico-synapse { background: linear-gradient(135deg, #6366f1, #a855f7) !important; color: white !important; border: none !important; }
+  .ico-grep { background: #24292e !important; color: #e1e4e8 !important; border: none !important; }
+  .ico-chrome { background: conic-gradient(from 0deg, #ea4335 0deg 90deg, #fbbc05 90deg 180deg, #34a853 180deg 270deg, #4285f4 270deg 360deg) !important; color: white !important; border: none !important; }
+  .ico-notepad { background: #ffffff !important; color: #0078d4 !important; border: none !important; }
+
   /* Taskbar */
   .taskbar {
     position: absolute; bottom: 0; left: 0; right: 0; height: 48px;
@@ -111,7 +123,6 @@
   }
 
   /* Apps Layout */
-  /* Echo Play App (Embedded from echoplay.vercel.app) */
   .echo-app { width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; }
   .echo-iframe { width: 100%; height: 100%; border: none; background: #0f172a; }
 
@@ -122,14 +133,12 @@
   .gd-app { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { background: #111; border: 1px solid var(--glass-border); border-radius: 8px; }
 
-  /* Standard Web Browser App */
   .browser-container { display: flex; flex-direction: column; height: 100%; background: #1e1e1e; }
   .browser-bar { padding: 8px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); }
   .browser-input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.08); color: white; outline: none; font-size: 13px; }
   .browser-btn { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
   .browser-iframe { flex: 1; border: none; width: 100%; background: #fff; }
 
-  /* YouTube App Styling */
   .yt-container { display: flex; flex-direction: column; height: 100%; background: #0f0f0f; color: white; }
   .yt-header { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid #272727; }
   .yt-search-input { flex: 1; padding: 8px 16px; border-radius: 20px; border: 1px solid #303030; background: #121212; color: white; outline: none; }
@@ -144,7 +153,6 @@
   .yt-channel { font-size: 12px; color: #aaa; }
   .yt-player-area { flex: 1; background: #000; display: flex; flex-direction: column; }
 
-  /* Complete Windows 12 Settings App Styling */
   .settings-container { display: flex; height: 100%; background: #181824; color: white; }
   .settings-sidebar { width: 220px; border-right: 1px solid var(--glass-border); padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
   .settings-tab { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; transition: 0.1s; }
@@ -168,7 +176,6 @@
   input:checked + .slider { background-color: var(--accent); }
   input:checked + .slider:before { transform: translateX(20px); }
 
-  /* Data Saver Banner */
   .data-saver-banner {
     position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #d83b01, #ea4300);
     color: white; font-size: 11px; padding: 4px 12px; display: none; align-items: center; justify-content: space-between; z-index: 99999;
@@ -189,7 +196,7 @@
   <!-- Microsoft Store Window -->
   <div class="window" id="win-store" style="width:720px; height:500px; top: 50px; left: 50px;" onmousedown="focusAppWindow('store')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🛍️</span> Microsoft Store</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:linear-gradient(135deg,#00188f,#00bcf2);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;">🛍️</div> Microsoft Store</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('store')">-</div>
         <div class="win-btn" onclick="toggleMaximize('store')">□</div>
@@ -201,10 +208,10 @@
     </div>
   </div>
 
-  <!-- Full Windows 12 Settings App -->
+  <!-- Settings App -->
   <div class="window" id="win-settings" style="width:780px; height:520px; top: 80px; left: 100px;" onmousedown="focusAppWindow('settings')">
     <div class="win-titlebar">
-      <div class="win-title"><span>⚙️</span> Settings</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#333;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#00bcf2;">⚙️</div> Settings</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('settings')">-</div>
         <div class="win-btn" onclick="toggleMaximize('settings')">□</div>
@@ -224,8 +231,6 @@
           <div class="settings-tab" onclick="switchSettingsTab('about', this)"><span>ℹ️</span> About Windows 12</div>
         </div>
         <div class="settings-content">
-          
-          <!-- SYSTEM PANE -->
           <div class="settings-pane active" id="pane-system">
             <h3 style="margin-bottom: 16px;">System Settings</h3>
             <div class="setting-group">
@@ -256,8 +261,6 @@
               </label>
             </div>
           </div>
-
-          <!-- NETWORK PANE -->
           <div class="settings-pane" id="pane-network">
             <h3 style="margin-bottom: 16px;">Network & Internet</h3>
             <div class="setting-group">
@@ -291,8 +294,6 @@
               </label>
             </div>
           </div>
-
-          <!-- PERSONALIZATION PANE -->
           <div class="settings-pane" id="pane-personalization">
             <h3 style="margin-bottom: 16px;">Personalization</h3>
             <div class="setting-group">
@@ -325,8 +326,6 @@
               </select>
             </div>
           </div>
-
-          <!-- APPS & FEATURES PANE -->
           <div class="settings-pane" id="pane-apps">
             <h3 style="margin-bottom: 16px;">Apps & Features</h3>
             <div class="setting-control-group">
@@ -335,8 +334,6 @@
               <div id="settings-app-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;"></div>
             </div>
           </div>
-
-          <!-- ACCOUNTS PANE -->
           <div class="settings-pane" id="pane-accounts">
             <h3 style="margin-bottom: 16px;">Your Microsoft Account</h3>
             <div class="setting-group">
@@ -360,8 +357,6 @@
               </label>
             </div>
           </div>
-
-          <!-- PRIVACY & SECURITY PANE -->
           <div class="settings-pane" id="pane-privacy">
             <h3 style="margin-bottom: 16px;">Privacy & Security</h3>
             <div class="setting-group">
@@ -395,8 +390,6 @@
               </label>
             </div>
           </div>
-
-          <!-- WINDOWS UPDATE PANE -->
           <div class="settings-pane" id="pane-windowsupdate">
             <h3 style="margin-bottom: 16px;">Windows Update</h3>
             <div class="setting-control-group">
@@ -405,8 +398,6 @@
               <button class="store-btn" style="margin-top: 8px; width: fit-content;" onclick="alert('Checking for updates... All systems current!')">Check for updates</button>
             </div>
           </div>
-
-          <!-- ABOUT WINDOW -->
           <div class="settings-pane" id="pane-about">
             <h3 style="margin-bottom: 16px;">About Windows 12</h3>
             <div class="setting-control-group">
@@ -419,16 +410,15 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Echo Play App (Embedded from echoplay.vercel.app) -->
+  <!-- Echo Play App -->
   <div class="window" id="win-echo" style="width:750px; height:500px; top: 130px; left: 180px;" onmousedown="focusAppWindow('echo')">
     <div class="win-titlebar">
-      <div class="win-title"><span>📻</span> Echo Play</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#10b981;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;">📻</div> Echo Play</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('echo')">-</div>
         <div class="win-btn" onclick="toggleMaximize('echo')">□</div>
@@ -445,7 +435,7 @@
   <!-- Geometry Dash App -->
   <div class="window" id="win-gd" style="width:520px; height:400px; top: 140px; left: 200px;" onmousedown="focusAppWindow('gd')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🟩</span> Geometry Dash</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#00ffcc;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:bold;">🟩</div> Geometry Dash</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('gd')">-</div>
         <div class="win-btn" onclick="toggleMaximize('gd')">□</div>
@@ -463,7 +453,7 @@
   <!-- VS Code App -->
   <div class="window" id="win-vscode" style="width:700px; height:450px; top: 160px; left: 250px;" onmousedown="focusAppWindow('vscode')">
     <div class="win-titlebar">
-      <div class="win-title"><span>💙</span> VS Code</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#0066b8;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;">💙</div> VS Code</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('vscode')">-</div>
         <div class="win-btn" onclick="toggleMaximize('vscode')">□</div>
@@ -481,7 +471,7 @@
   <!-- YouTube App -->
   <div class="window" id="win-youtube" style="width:850px; height:550px; top: 180px; left: 300px;" onmousedown="focusAppWindow('youtube')">
     <div class="win-titlebar">
-      <div class="win-title"><span>▶️</span> YouTube</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#ff0000;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;">▶️</div> YouTube</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('youtube')">-</div>
         <div class="win-btn" onclick="toggleMaximize('youtube')">□</div>
@@ -509,7 +499,7 @@
   <!-- Synapse Search App -->
   <div class="window" id="win-synapse" style="width:800px; height:520px; top: 190px; left: 320px;" onmousedown="focusAppWindow('synapse')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🔎</span> Synapse Search</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:linear-gradient(135deg,#6366f1,#a855f7);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;">🔎</div> Synapse Search</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('synapse')">-</div>
         <div class="win-btn" onclick="toggleMaximize('synapse')">□</div>
@@ -517,8 +507,8 @@
       </div>
     </div>
     <div class="win-content">
-      <div class="synapse-container">
-        <iframe class="synapse-iframe" src="https://synapse-search.vercel.app/results?q=67" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      <div class="synapse-container" style="width:100%; height:100%;">
+        <iframe style="width:100%; height:100%; border:none;" src="https://synapse-search.vercel.app/results?q=67" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
       </div>
     </div>
   </div>
@@ -526,7 +516,7 @@
   <!-- Grep.app Embedded App -->
   <div class="window" id="win-grep" style="width:750px; height:500px; top: 200px; left: 350px;" onmousedown="focusAppWindow('grep')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🔍</span> grep.app</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#24292e;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#e1e4e8;">🔍</div> grep.app</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('grep')">-</div>
         <div class="win-btn" onclick="toggleMaximize('grep')">□</div>
@@ -534,8 +524,8 @@
       </div>
     </div>
     <div class="win-content">
-      <div class="grep-container">
-        <iframe class="grep-iframe" src="https://grep.app" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      <div class="grep-container" style="width:100%; height:100%;">
+        <iframe style="width:100%; height:100%; border:none;" src="https://grep.app" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
       </div>
     </div>
   </div>
@@ -543,7 +533,7 @@
   <!-- Standard Web Browser App -->
   <div class="window" id="win-chrome" style="width:780px; height:500px; top: 220px; left: 400px;" onmousedown="focusAppWindow('chrome')">
     <div class="win-titlebar">
-      <div class="win-title"><span>🌐</span> Web Browser</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:conic-gradient(from 0deg,#ea4335 0deg 90deg,#fbbc05 90deg 180deg,#34a853 180deg 270deg,#4285f4 270deg 360deg);display:inline-flex;align-items:center;justify-content:center;"></div> Web Browser</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('chrome')">-</div>
         <div class="win-btn" onclick="toggleMaximize('chrome')">□</div>
@@ -564,7 +554,7 @@
   <!-- Notepad App -->
   <div class="window" id="win-notepad" style="width:400px; height:300px; top: 240px; left: 450px;" onmousedown="focusAppWindow('notepad')">
     <div class="win-titlebar">
-      <div class="win-title"><span>📝</span> Notepad</div>
+      <div class="win-title"><div style="width:16px;height:16px;border-radius:3px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#0078d4;">📝</div> Notepad</div>
       <div class="win-controls">
         <div class="win-btn" onclick="minimizeWindow('notepad')">-</div>
         <div class="win-btn" onclick="toggleMaximize('notepad')">□</div>
@@ -589,24 +579,22 @@
 </div>
 
 <script>
-  // OS Applications Registry
   const apps = [
-    { id: 'store', name: 'Microsoft Store', icon: '🛍️' },
-    { id: 'settings', name: 'Settings', icon: '⚙️' },
-    { id: 'echo', name: 'Echo Play', icon: '📻' },
-    { id: 'gd', name: 'Geometry Dash', icon: '🟩' },
-    { id: 'vscode', name: 'VS Code', icon: '💙' },
-    { id: 'youtube', name: 'YouTube', icon: '▶️' },
-    { id: 'synapse', name: 'Synapse Search', icon: '🔎' },
-    { id: 'grep', name: 'grep.app', icon: '🔍' },
-    { id: 'chrome', name: 'Web Browser', icon: '🌐' },
-    { id: 'notepad', name: 'Notepad', icon: '📝' }
+    { id: 'store', name: 'Microsoft Store', icon: '🛍️', logoClass: 'ico-store' },
+    { id: 'settings', name: 'Settings', icon: '⚙️', logoClass: 'ico-settings' },
+    { id: 'echo', name: 'Echo Play', icon: '📻', logoClass: 'ico-echo' },
+    { id: 'gd', name: 'Geometry Dash', icon: '🟩', logoClass: 'ico-gd' },
+    { id: 'vscode', name: 'VS Code', icon: '💙', logoClass: 'ico-vscode' },
+    { id: 'youtube', name: 'YouTube', icon: '▶️', logoClass: 'ico-youtube' },
+    { id: 'synapse', name: 'Synapse Search', icon: '🔎', logoClass: 'ico-synapse' },
+    { id: 'grep', name: 'grep.app', icon: '🔍', logoClass: 'ico-grep' },
+    { id: 'chrome', name: 'Web Browser', icon: '🌐', logoClass: 'ico-chrome' },
+    { id: 'notepad', name: 'Notepad', icon: '📝', logoClass: 'ico-notepad' }
   ];
 
   let activeWindow = null;
   let topZIndex = 100;
 
-  // Initialize Desktop Icons & Taskbar shortcuts
   function initOS() {
     const desktop = document.getElementById('desktop');
     const taskbarCenter = document.getElementById('taskbar-apps');
@@ -617,13 +605,13 @@
       // Desktop Icon
       const icon = document.createElement('div');
       icon.className = 'desktop-icon';
-      icon.innerHTML = `<div class="ico">${app.icon}</div><span>${app.name}</span>`;
+      icon.innerHTML = `<div class="ico ${app.logoClass}">${app.icon}</div><span>${app.name}</span>`;
       icon.ondblclick = () => openWindow(app.id);
       desktop.appendChild(icon);
 
       // Taskbar Icon
       const tBtn = document.createElement('div');
-      tBtn.className = 'taskbar-btn';
+      tBtn.className = `taskbar-btn ${app.logoClass}`;
       tBtn.id = `tb-${app.id}`;
       tBtn.innerHTML = app.icon;
       tBtn.title = app.name;
@@ -634,7 +622,7 @@
       if(storeCatalog) {
         const card = document.createElement('div');
         card.className = 'store-card';
-        card.innerHTML = `<div style="font-size:24px;">${app.icon}</div><strong>${app.name}</strong><div style="font-size:11px; color:var(--text-dim);">Verified Windows 12 Web App package.</div><button class="store-btn" onclick="openWindow('${app.id}')">Launch</button>`;
+        card.innerHTML = `<div class="ico ${app.logoClass}" style="width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px;">${app.icon}</div><strong>${app.name}</strong><div style="font-size:11px; color:var(--text-dim);">Verified Windows 12 Web App package.</div><button class="store-btn" onclick="openWindow('${app.id}')">Launch</button>`;
         storeCatalog.appendChild(card);
       }
 
@@ -642,7 +630,7 @@
       if(settingsAppList) {
         const row = document.createElement('div');
         row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:8px 12px; border-radius:6px;";
-        row.innerHTML = `<span>${app.icon} ${app.name}</span><button class="store-btn" style="background:#e81123;" onclick="alert('${app.name} is a core system component and cannot be uninstalled.')">Manage</button>`;
+        row.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><div class="ico ${app.logoClass}" style="width:24px; height:24px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:12px;">${app.icon}</div><span>${app.name}</span></div><button class="store-btn" style="background:#e81123;" onclick="alert('${app.name} is a core system component and cannot be uninstalled.')">Manage</button>`;
         settingsAppList.appendChild(row);
       }
     });
@@ -692,7 +680,9 @@
     const win = document.getElementById(`win-${id}`);
     if(win) win.style.zIndex = topZIndex;
 
-    document.querySelectorAll('.taskbar-btn').forEach(b => b.classList.remove('running'));
+    document.querySelectorAll('.taskbar-btn').forEach(b => {
+      if(!b.classList.contains('start-btn')) b.classList.remove('running');
+    });
     apps.forEach(a => {
       const w = document.getElementById(`win-${a.id}`);
       const tb = document.getElementById(`tb-${a.id}`);
@@ -714,7 +704,6 @@
     document.getElementById('taskbar-clock').innerText = `${hours}:${minutes} ${ampm}`;
   }
 
-  // Settings Panes Switcher
   function switchSettingsTab(tabName, el) {
     document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
@@ -723,7 +712,6 @@
     if(pane) pane.classList.add('active');
   }
 
-  // System Settings Action Handlers
   function adjustBrightness(val) {
     const container = document.getElementById('main-container');
     container.style.filter = `brightness(${val / 100})`;
@@ -762,11 +750,8 @@
     }
   }
 
-  function saveSettingsState() {
-    // Simulated state preservation
-  }
+  function saveSettingsState() {}
 
-  // VS Code Code Preview Live Renderer
   function updateCodePreview() {
     const code = document.getElementById('code-editor').value;
     const preview = document.getElementById('code-preview');
@@ -776,7 +761,6 @@
     doc.close();
   }
 
-  // YouTube Simulated Search
   function searchYouTube() {
     const query = document.getElementById('yt-search-box').value;
     const resultsContainer = document.getElementById('yt-results');
@@ -798,7 +782,6 @@
     document.getElementById('yt-player').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
   }
 
-  // Web Browser Navigation
   function navigateBrowser() {
     const urlInput = document.getElementById('browser-url').value;
     let target = urlInput;
@@ -808,12 +791,8 @@
     document.getElementById('browser-frame').src = target;
   }
 
-  // Notepad State Preservation
-  function saveNotepad() {
-    // Simulated autosave
-  }
+  function saveNotepad() {}
 
-  // Geometry Dash Mini Game Loop
   function initGeometryDash() {
     const canvas = document.getElementById('gdCanvas');
     if(!canvas) return;
@@ -845,15 +824,12 @@
       if(!gameRunning) return;
       frameCount++;
 
-      // Clear canvas
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Floor
       ctx.fillStyle = '#00ffcc';
       ctx.fillRect(0, 244, canvas.width, 4);
 
-      // Physics
       cube.vy += cube.gravity;
       cube.y += cube.vy;
       if(cube.y >= 220) {
@@ -862,23 +838,19 @@
         cube.grounded = true;
       }
 
-      // Draw Cube
       ctx.fillStyle = '#ff0055';
       ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
 
-      // Spawn Obstacles
       if(frameCount % 90 === 0) {
         obstacles.push({ x: canvas.width, y: 224, width: 20, height: 20, speed: 5 });
       }
 
-      // Update & Draw Obstacles
       for(let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i];
         obs.x -= obs.speed;
         ctx.fillStyle = '#00ffcc';
         ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
-        // Collision Check
         if(
           cube.x < obs.x + obs.width &&
           cube.x + cube.size > obs.x &&
@@ -891,7 +863,6 @@
           frameCount = 0;
         }
 
-        // Offscreen check
         if(obs.x + obs.width < 0) {
           obstacles.splice(i, 1);
           score += 10;
@@ -904,7 +875,6 @@
     loop();
   }
 
-  // Run OS on Load
   window.onload = initOS;
 </script>
 </body>
