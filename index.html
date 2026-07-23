@@ -219,7 +219,7 @@
     </div>
   </div>
 
-  <!-- YouTube App (Now with Search!) -->
+  <!-- YouTube App (Hidden instead of clearing src on close so audio continues) -->
   <div class="window" id="win-youtube" style="width:850px; height:550px;">
     <div class="win-titlebar">
       <div class="win-title"><span>▶️</span> YouTube</div>
@@ -364,7 +364,7 @@
     const win = document.getElementById(`win-${id}`);
     if (win) win.classList.remove('open');
     if (id === 'spotify') document.getElementById('audio-player').pause();
-    if (id === 'youtube') document.getElementById('yt-player').src = ""; // Stop video
+    // Removed the line clearing the YouTube iframe src, so audio continues playing in the background!
   }
 
   function minimizeWindow(id) {
